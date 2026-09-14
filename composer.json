@@ -27,7 +27,8 @@
         "mockery/mockery": "^1.6",
         "nunomaduro/collision": "^8.9.3",
         "pestphp/pest": "^5.1",
-        "pestphp/pest-plugin-laravel": "^5.0"
+        "pestphp/pest-plugin-laravel": "^5.0",
+        "rector/rector": "^2.6"
     },
     "autoload": {
         "psr-4": {
@@ -54,11 +55,17 @@
             "Composer\\Config::disableProcessTimeout",
             "@php artisan dev"
         ],
+        "pint:test": "pint --test",
+        "pint": "pint",
+        "rector:dry": "rector --dry-run",
+        "rector": "rector process",
         "lint": [
-            "pint --parallel"
+            "@rector",
+            "@pint"
         ],
         "lint:check": [
-            "pint --parallel --test"
+            "@rector:dry",
+            "@pint:test"
         ],
         "ci:check": [
             "Composer\\Config::disableProcessTimeout",
