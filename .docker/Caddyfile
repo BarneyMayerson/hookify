@@ -1,0 +1,4 @@
+hookify.lan {
+    tls /certs/hookify.lan+2.pem /certs/hookify.lan+2-key.pem
+    reverse_proxy laravel.test:80
+}
