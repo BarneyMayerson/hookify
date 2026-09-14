@@ -28,6 +28,7 @@
         "nunomaduro/collision": "^8.9.3",
         "pestphp/pest": "^5.1",
         "pestphp/pest-plugin-laravel": "^5.0",
+        "pestphp/pest-plugin-phpstan": "^5.2",
         "rector/rector": "^2.6"
     },
     "autoload": {
@@ -59,13 +60,15 @@
         "pint": "pint",
         "rector:dry": "rector --dry-run",
         "rector": "rector process",
+        "phpstan": "phpstan analyse",
         "lint": [
             "@rector",
             "@pint"
         ],
         "lint:check": [
             "@rector:dry",
-            "@pint:test"
+            "@pint:test",
+            "@phpstan"
         ],
         "ci:check": [
             "Composer\\Config::disableProcessTimeout",
