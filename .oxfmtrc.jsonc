@@ -15,4 +15,8 @@
     "resources/js/components/ui/*",
     "resources/views/mail/*",
   ],
+  "sortTailwindcss": {
+    "functions": ["clsx", "cn", "cva"],
+    "entryPoint": "resources/css/app.css",
+  },
 }
