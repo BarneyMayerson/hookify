@@ -1,0 +1,18 @@
+// ⚠️ Держать в синхроне с блоком `fmt` в vite.config.ts.
+// Нужен отдельно, т.к. VSCode-расширение Oxc (в отличие от `vp check`)
+// не читает nested-конфиг из vite.config.ts при обычном автообнаружении oxfmt.
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "printWidth": 100,
+  "tabWidth": 2,
+  "singleQuote": true,
+  "semi": true,
+  "singleAttributePerLine": false,
+  "htmlWhitespaceSensitivity": "css",
+  "ignorePatterns": [
+    ".github/**",
+    "composer.json",
+    "resources/js/components/ui/*",
+    "resources/views/mail/*",
+  ],
+}
