@@ -1,11 +1,18 @@
 <?php
 
+use App\Http\Controllers\Auth\GitHubController;
+use App\Http\Controllers\ProjectController;
 use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'Welcome')->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::inertia('dashboard', 'Dashboard')->name('dashboard');
+    Route::get('projects', [ProjectController::class, 'index'])->name('projects.index');
+    Route::post('projects', [ProjectController::class, 'store'])->name('projects.store');
 });
+
+Route::get('auth/github/redirect', [GitHubController::class, 'redirect'])->name('auth.github.redirect');
+Route::get('auth/github/callback', [GitHubController::class, 'callback'])->name('auth.github.callback');
 
 require __DIR__.'/settings.php';
