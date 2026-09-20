@@ -18,6 +18,14 @@ class ManifestController extends Controller
      */
     private const int SCHEMA_VERSION = 1;
 
+    /**
+     * Известные типы git-хуков. Новый тип (например, pre-push в v2.0)
+     * добавляется сюда одной строкой — не трогая остальную логику метода.
+     *
+     * @var list<string>
+     */
+    private const array HOOK_TYPES = ['pre-commit', 'commit-msg'];
+
     public function show(Request $request): JsonResponse
     {
         /** @var Project $project */
@@ -31,13 +39,29 @@ class ManifestController extends Controller
         // forIds сохраняет порядок каталога, а не порядок строк в БД —
         // манифест детерминирован независимо от того, в каком порядке
         // записи попали в project_rules.
-        $preCommit = collect(ChecksCatalog::forIds($enabledIds))
+        $enabledChecks = collect(ChecksCatalog::forIds($enabledIds))
             ->map(static fn (array $check, string $id): array => [
                 'id' => $id,
                 'run' => $check['command'],
+                'hook' => $check['hook'],
             ])
-            ->values()
-            ->all();
+            ->values();
+
+        // Оба ключа хуков присутствуют всегда, даже пустыми списками —
+        // CLI и фронт полагаются на стабильную форму JSON, а не на то,
+        // что ключ есть только когда для него что-то включено.
+        $hooks = collect(self::HOOK_TYPES)->mapWithKeys(
+            static fn (string $hookName): array => [
+                $hookName => $enabledChecks
+                    ->where('hook', $hookName)
+                    ->map(static fn (array $check): array => [
+                        'id' => $check['id'],
+                        'run' => $check['run'],
+                    ])
+                    ->values()
+                    ->all(),
+            ],
+        );
 
         return response()->json([
             'schema_version' => self::SCHEMA_VERSION,
@@ -45,10 +69,8 @@ class ManifestController extends Controller
                 'id' => $project->id,
                 'name' => $project->name,
             ],
-            'hooks' => [
-                // Быстрые проверки — и только они. Тяжёлое идёт в pre-push/CI.
-                'pre-commit' => $preCommit,
-            ],
+            // Быстрые проверки — и только они. Тяжёлое идёт в pre-push/CI.
+            'hooks' => $hooks,
         ]);
     }
 }

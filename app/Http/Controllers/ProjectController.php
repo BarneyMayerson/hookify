@@ -36,6 +36,7 @@ class ProjectController extends Controller
                     'label' => $check['label'],
                     'ecosystem' => $check['ecosystem'],
                     'tier' => $check['tier'],
+                    'requiresConfig' => $check['requiresConfig'],
                 ])
                 ->values(),
             'enabledIds' => $project->rules()->pluck('check_id'),

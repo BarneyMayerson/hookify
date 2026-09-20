@@ -11,6 +11,8 @@ namespace App\Support;
  *     command: string,
  *     tier: 'primary'|'secondary',
  *     default: bool,
+ *     hook: 'pre-commit'|'commit-msg',
+ *     requiresConfig: bool,
  * }
  */
 class ChecksCatalog
@@ -18,6 +20,11 @@ class ChecksCatalog
     /**
      * Фиксированный список — пользователь включает/выключает готовые чеки
      * тогглами, а не вводит свои команды, поэтому это код, а не таблица БД.
+     *
+     * requiresConfig=true — чек не работает "из коробки" на дефолтах,
+     * ему нужен собственный конфиг-файл в целевом репозитории (иначе
+     * первый же коммит упадёт с ошибкой конфигурации, а не находкой стиля).
+     * Конструктор должен явно предупреждать об этом при включении.
      *
      * @return array<string, Check>
      */
@@ -30,6 +37,8 @@ class ChecksCatalog
                 'command' => 'vendor/bin/pint --dirty --test',
                 'tier' => 'primary',
                 'default' => true,
+                'hook' => 'pre-commit',
+                'requiresConfig' => false,
             ],
             'phpstan' => [
                 'label' => 'PHPStan',
@@ -37,6 +46,8 @@ class ChecksCatalog
                 'command' => 'vendor/bin/phpstan analyse --no-progress',
                 'tier' => 'primary',
                 'default' => false,
+                'hook' => 'pre-commit',
+                'requiresConfig' => false,
             ],
             'oxlint' => [
                 'label' => 'OXC — oxlint',
@@ -44,6 +55,8 @@ class ChecksCatalog
                 'command' => 'npx --no-install oxlint --deny-warnings',
                 'tier' => 'primary',
                 'default' => true,
+                'hook' => 'pre-commit',
+                'requiresConfig' => false,
             ],
             'oxfmt' => [
                 'label' => 'OXC — oxfmt',
@@ -51,6 +64,8 @@ class ChecksCatalog
                 'command' => 'npx --no-install oxfmt --check .',
                 'tier' => 'primary',
                 'default' => true,
+                'hook' => 'pre-commit',
+                'requiresConfig' => false,
             ],
             'eslint' => [
                 'label' => 'ESLint',
@@ -58,6 +73,8 @@ class ChecksCatalog
                 'command' => 'npx --no-install eslint .',
                 'tier' => 'secondary',
                 'default' => false,
+                'hook' => 'pre-commit',
+                'requiresConfig' => false,
             ],
             'prettier' => [
                 'label' => 'Prettier',
@@ -65,6 +82,8 @@ class ChecksCatalog
                 'command' => 'npx --no-install prettier --check .',
                 'tier' => 'secondary',
                 'default' => false,
+                'hook' => 'pre-commit',
+                'requiresConfig' => false,
             ],
             'gitleaks' => [
                 'label' => 'Secret scanning (gitleaks)',
@@ -72,6 +91,19 @@ class ChecksCatalog
                 'command' => 'gitleaks protect --staged --redact',
                 'tier' => 'primary',
                 'default' => true,
+                'hook' => 'pre-commit',
+                'requiresConfig' => false,
+            ],
+            'commitlint' => [
+                'label' => 'Commit message format (commitlint)',
+                'ecosystem' => 'universal',
+                // $1 — путь к файлу с сообщением коммита, его передаёт сам git
+                // при вызове commit-msg хука, а не CLI Hookify.
+                'command' => 'npx --no-install commitlint --edit "$1"',
+                'tier' => 'primary',
+                'default' => false,
+                'hook' => 'commit-msg',
+                'requiresConfig' => true,
             ],
         ];
     }

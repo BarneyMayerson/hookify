@@ -20,7 +20,7 @@ const plaintextToken = computed(() => page.props.flash?.plaintext_token);
 
 const installCommand = computed(() =>
   plaintextToken.value
-    ? `HOOKIFY_TOKEN=${plaintextToken.value} HOOKIFY_API=${props.apiBase} npx @hookify/cli sync`
+    ? `HOOKIFY_TOKEN=${plaintextToken.value} HOOKIFY_API=${props.apiBase} npx hookify-cli sync`
     : '',
 );
 
@@ -91,3 +91,5 @@ function copyCommand() {
     </ul>
   </div>
 </template>
+HOOKIFY_TOKEN=hk_live_IflNnWt8JG7TPVcqa4VKQkQ5TxRVGTEezWl40lxf
+HOOKIFY_API=https://hookify.lan/api/v1 npx hookify-cli sync

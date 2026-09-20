@@ -30,8 +30,31 @@ describe('Manifest API', function () {
             ->assertJsonStructure([
                 'schema_version',
                 'project' => ['id', 'name'],
-                'hooks' => ['pre-commit' => [['id', 'run']]],
+                'hooks' => [
+                    'pre-commit' => [['id', 'run']],
+                    'commit-msg',
+                ],
             ]);
+    });
+
+    it('always includes both hook keys, even when one is empty', function () {
+        [, $token] = Project::createWithToken(User::factory()->create(), 'Acme');
+
+        // Дефолты — только pre-commit чеки, commitlint не включён по умолчанию.
+        withToken($token)
+            ->getJson('/api/v1/manifest')
+            ->assertJsonPath('hooks.commit-msg', []);
+    });
+
+    it('routes a commit-msg check into hooks.commit-msg, not pre-commit', function () {
+        [$project, $token] = Project::createWithToken(User::factory()->create(), 'Acme');
+        $project->rules()->create(['check_id' => 'commitlint']);
+
+        withToken($token)
+            ->getJson('/api/v1/manifest')
+            ->assertJsonPath('hooks.commit-msg.0.id', 'commitlint')
+            ->assertJsonPath('hooks.commit-msg.0.run', 'npx --no-install commitlint --edit "$1"')
+            ->assertJsonCount(4, 'hooks.pre-commit');
     });
 
     it('returns the default checks for a freshly created project', function () {
