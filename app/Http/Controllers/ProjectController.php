@@ -20,6 +20,7 @@ class ProjectController extends Controller
             'projects' => $request->user()->projects()
                 ->latest()
                 ->get(['id', 'name', 'api_token_prefix', 'last_synced_at']),
+            'apiBase' => rtrim(config('app.url'), '/').'/api/v1',
         ]);
     }
 

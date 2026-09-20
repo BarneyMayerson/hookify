@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Link, useForm, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
-import { store, show } from '@/routes/projects';
+import { show, store } from '@/routes/projects';
 
 interface Project {
   id: number;
@@ -10,12 +10,19 @@ interface Project {
   last_synced_at: string | null;
 }
 
-defineProps<{
+const props = defineProps<{
   projects: Project[];
+  apiBase: string;
 }>();
 
 const page = usePage<{ flash?: { plaintext_token?: string } }>();
 const plaintextToken = computed(() => page.props.flash?.plaintext_token);
+
+const installCommand = computed(() =>
+  plaintextToken.value
+    ? `HOOKIFY_TOKEN=${plaintextToken.value} HOOKIFY_API=${props.apiBase} npx @hookify/cli sync`
+    : '',
+);
 
 const form = useForm({
   name: '',
@@ -27,8 +34,8 @@ function submit() {
   });
 }
 
-function copyToken() {
-  if (plaintextToken.value) navigator.clipboard.writeText(plaintextToken.value);
+function copyCommand() {
+  if (installCommand.value) navigator.clipboard.writeText(installCommand.value);
 }
 </script>
 
@@ -40,15 +47,17 @@ function copyToken() {
       v-if="plaintextToken"
       class="rounded-md border border-amber-300 bg-amber-50 p-4 text-sm dark:border-amber-800 dark:bg-amber-950"
     >
-      <p class="font-medium">Сохраните токен — он показывается один раз.</p>
+      <p class="font-medium">Сохраните команду — токен в ней показывается один раз.</p>
       <div class="mt-2 flex items-center gap-2">
-        <code class="flex-1 truncate rounded bg-white px-2 py-1 dark:bg-black">{{
-          plaintextToken
-        }}</code>
+        <code
+          class="flex-1 overflow-x-auto rounded bg-white px-2 py-1 whitespace-nowrap dark:bg-black"
+        >
+          {{ installCommand }}
+        </code>
         <button
           type="button"
-          class="rounded bg-amber-600 px-3 py-1 text-white hover:bg-amber-700"
-          @click="copyToken"
+          class="shrink-0 rounded bg-amber-600 px-3 py-1 text-white hover:bg-amber-700"
+          @click="copyCommand"
         >
           Copy
         </button>

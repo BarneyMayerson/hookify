@@ -57,6 +57,18 @@ describe('Project creation', function () {
         );
     });
 
+    it('exposes the API base derived from app config', function () {
+        $user = User::factory()->create();
+
+        $response = actingAs($user)->get(route('projects.index'));
+
+        $response->assertInertia(
+            fn ($page) => $page
+                ->component('Projects/Index')
+                ->where('apiBase', rtrim(config('app.url'), '/').'/api/v1'),
+        );
+    });
+
     it('only lists the current user\'s projects', function () {
         $user = User::factory()->create();
         $stranger = User::factory()->create();
