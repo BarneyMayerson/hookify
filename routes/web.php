@@ -2,14 +2,18 @@
 
 use App\Http\Controllers\Auth\GitHubController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\ProjectRuleController;
 use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'Welcome')->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::inertia('dashboard', 'Dashboard')->name('dashboard');
+
     Route::get('projects', [ProjectController::class, 'index'])->name('projects.index');
     Route::post('projects', [ProjectController::class, 'store'])->name('projects.store');
+    Route::get('projects/{project}', [ProjectController::class, 'show'])->name('projects.show');
+    Route::put('projects/{project}/rules', [ProjectRuleController::class, 'update'])->name('projects.rules.update');
 });
 
 Route::get('auth/github/redirect', [GitHubController::class, 'redirect'])->name('auth.github.redirect');

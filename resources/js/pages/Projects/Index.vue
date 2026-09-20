@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { useForm, usePage } from '@inertiajs/vue3';
+import { Link, useForm, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
-import { store } from '@/routes/projects';
+import { store, show } from '@/routes/projects';
 
 interface Project {
   id: number;
@@ -74,7 +74,9 @@ function copyToken() {
 
     <ul class="divide-y">
       <li v-for="project in projects" :key="project.id" class="flex justify-between py-3">
-        <span>{{ project.name }}</span>
+        <Link :href="show(project.id).url" class="hover:underline">
+          {{ project.name }}
+        </Link>
         <span class="text-sm text-gray-500">{{ project.api_token_prefix }}…</span>
       </li>
     </ul>
