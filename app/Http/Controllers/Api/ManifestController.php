@@ -6,15 +6,13 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Project;
+use App\Support\ChecksCatalog;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class ManifestController extends Controller
 {
     /**
-     * v0.1: пресет захардкожен. Таблица project_rules появится в v1.0
-     * вместе с конструктором — до этого персистить нечего.
-     *
      * Версия схемы манифеста передаётся явно: CLI старой версии должен уметь
      * понять, что сервер отдал формат, который он не умеет читать.
      */
@@ -27,6 +25,20 @@ class ManifestController extends Controller
 
         $project->forceFill(['last_synced_at' => now()])->save();
 
+        /** @var list<string> $enabledIds */
+        $enabledIds = $project->rules()->pluck('check_id')->all();
+
+        // forIds сохраняет порядок каталога, а не порядок строк в БД —
+        // манифест детерминирован независимо от того, в каком порядке
+        // записи попали в project_rules.
+        $preCommit = collect(ChecksCatalog::forIds($enabledIds))
+            ->map(static fn (array $check, string $id): array => [
+                'id' => $id,
+                'run' => $check['command'],
+            ])
+            ->values()
+            ->all();
+
         return response()->json([
             'schema_version' => self::SCHEMA_VERSION,
             'project' => [
@@ -34,12 +46,8 @@ class ManifestController extends Controller
                 'name' => $project->name,
             ],
             'hooks' => [
-                'pre-commit' => [
-                    // Быстрые проверки — и только они. Тяжёлое идёт в pre-push/CI.
-                    ['id' => 'pint', 'run' => 'vendor/bin/pint --dirty --test'],
-                    ['id' => 'oxlint', 'run' => 'npx --no-install oxlint --deny-warnings'],
-                    ['id' => 'oxfmt', 'run' => 'npx --no-install oxfmt --check .'],
-                ],
+                // Быстрые проверки — и только они. Тяжёлое идёт в pre-push/CI.
+                'pre-commit' => $preCommit,
             ],
         ]);
     }

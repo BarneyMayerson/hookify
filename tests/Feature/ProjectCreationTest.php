@@ -2,6 +2,7 @@
 
 use App\Models\Project;
 use App\Models\User;
+use App\Support\ChecksCatalog;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\post;
@@ -25,6 +26,15 @@ describe('Project creation', function () {
         $project = Project::where('user_id', $user->id)->first();
         expect($project->name)->toBe('Acme')
             ->and($project->api_token_hash)->toBe(hash('sha256', $token));
+    });
+
+    it('seeds the default checks from the catalog', function () {
+        $user = User::factory()->create();
+
+        actingAs($user)->post(route('projects.store'), ['name' => 'Acme']);
+
+        $project = Project::where('user_id', $user->id)->first();
+        expect($project->rules()->pluck('check_id')->all())->toBe(ChecksCatalog::defaults());
     });
 
     it('rejects an empty name', function () {

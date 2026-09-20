@@ -2,6 +2,7 @@
 
 use App\Models\Project;
 use App\Models\User;
+use App\Support\ChecksCatalog;
 
 use function Pest\Laravel\getJson;
 use function Pest\Laravel\withToken;
@@ -31,6 +32,53 @@ describe('Manifest API', function () {
                 'project' => ['id', 'name'],
                 'hooks' => ['pre-commit' => [['id', 'run']]],
             ]);
+    });
+
+    it('returns the default checks for a freshly created project', function () {
+        [, $token] = Project::createWithToken(User::factory()->create(), 'Acme');
+
+        $ids = withToken($token)
+            ->getJson('/api/v1/manifest')
+            ->json('hooks.pre-commit.*.id');
+
+        expect($ids)->toBe(ChecksCatalog::defaults());
+    });
+
+    it('reflects only the checks enabled for this project', function () {
+        [$project, $token] = Project::createWithToken(User::factory()->create(), 'Acme');
+        $project->rules()->delete();
+        $project->rules()->create(['check_id' => 'eslint']);
+        $project->rules()->create(['check_id' => 'prettier']);
+
+        withToken($token)
+            ->getJson('/api/v1/manifest')
+            ->assertJsonPath('hooks.pre-commit.0.id', 'eslint')
+            ->assertJsonPath('hooks.pre-commit.1.id', 'prettier')
+            ->assertJsonCount(2, 'hooks.pre-commit');
+    });
+
+    it('orders checks by catalog order, not insertion order', function () {
+        [$project, $token] = Project::createWithToken(User::factory()->create(), 'Acme');
+        $project->rules()->delete();
+        // Вставляем в обратном порядке относительно каталога — манифест
+        // всё равно должен вернуть каталожный порядок.
+        $project->rules()->create(['check_id' => 'oxfmt']);
+        $project->rules()->create(['check_id' => 'pint']);
+
+        $ids = withToken($token)
+            ->getJson('/api/v1/manifest')
+            ->json('hooks.pre-commit.*.id');
+
+        expect($ids)->toBe(['pint', 'oxfmt']);
+    });
+
+    it('returns an empty pre-commit list when no checks are enabled', function () {
+        [$project, $token] = Project::createWithToken(User::factory()->create(), 'Acme');
+        $project->rules()->delete();
+
+        withToken($token)
+            ->getJson('/api/v1/manifest')
+            ->assertJsonPath('hooks.pre-commit', []);
     });
 
     it('never exposes the token hash', function () {
