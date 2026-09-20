@@ -14,8 +14,8 @@ defineProps<{
   projects: Project[];
 }>();
 
-const page = usePage<{ flash: { plaintext_token?: string } }>();
-const plaintextToken = computed(() => page.props.flash.plaintext_token);
+const page = usePage<{ flash?: { plaintext_token?: string } }>();
+const plaintextToken = computed(() => page.props.flash?.plaintext_token);
 
 const form = useForm({
   name: '',

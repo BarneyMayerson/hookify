@@ -37,7 +37,7 @@ class ManifestController extends Controller
                 'pre-commit' => [
                     // Быстрые проверки — и только они. Тяжёлое идёт в pre-push/CI.
                     ['id' => 'pint', 'run' => 'vendor/bin/pint --dirty --test'],
-                    ['id' => 'oxlint', 'run' => 'npx --no-install oxlint'],
+                    ['id' => 'oxlint', 'run' => 'npx --no-install oxlint --deny-warnings'],
                     ['id' => 'oxfmt', 'run' => 'npx --no-install oxfmt --check .'],
                 ],
             ],

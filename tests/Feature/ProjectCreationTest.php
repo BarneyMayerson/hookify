@@ -43,7 +43,7 @@ describe('Project creation', function () {
         $response = actingAs($user)->get(route('projects.index'));
 
         $response->assertInertia(
-            fn ($page) => $page->component('Projects/Index')->missing('flash.plaintext_token'),
+            fn ($page) => $page->component('Projects/Index')->where('flash.plaintext_token', null),
         );
     });
 
