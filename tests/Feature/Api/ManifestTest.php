@@ -54,7 +54,7 @@ describe('Manifest API', function () {
             ->getJson('/api/v1/manifest')
             ->assertJsonPath('hooks.commit-msg.0.id', 'commitlint')
             ->assertJsonPath('hooks.commit-msg.0.run', 'npx --no-install commitlint --edit "$1"')
-            ->assertJsonCount(4, 'hooks.pre-commit');
+            ->assertJsonCount(3, 'hooks.pre-commit');
     });
 
     it('returns the default checks for a freshly created project', function () {

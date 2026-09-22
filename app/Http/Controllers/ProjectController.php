@@ -37,6 +37,7 @@ class ProjectController extends Controller
                     'ecosystem' => $check['ecosystem'],
                     'tier' => $check['tier'],
                     'requiresConfig' => $check['requiresConfig'],
+                    'requiresBinary' => $check['requiresBinary'],
                 ])
                 ->values(),
             'enabledIds' => $project->rules()->pluck('check_id'),

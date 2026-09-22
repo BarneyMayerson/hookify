@@ -3,10 +3,11 @@
 use App\Support\ChecksCatalog;
 
 describe('ChecksCatalog', function () {
-    it('gives every check a label, ecosystem, command, tier, hook and requiresConfig', function () {
+    it('gives every check a label, ecosystem, command, tier, hook, requiresConfig and requiresBinary', function () {
         foreach (ChecksCatalog::all() as $check) {
             expect($check)->toHaveKeys([
-                'label', 'ecosystem', 'command', 'tier', 'default', 'hook', 'requiresConfig',
+                'label', 'ecosystem', 'command', 'tier', 'default',
+                'hook', 'requiresConfig', 'requiresBinary',
             ])
                 ->and($check['ecosystem'])->toBeIn(['php', 'js', 'universal'])
                 ->and($check['tier'])->toBeIn(['primary', 'secondary'])
@@ -19,13 +20,21 @@ describe('ChecksCatalog', function () {
             ->and(ChecksCatalog::isValid('does-not-exist'))->toBeFalse();
     });
 
-    it('only defaults to primary OXC + Pint + gitleaks, not legacy ESLint/Prettier', function () {
-        // Замок на осознанное решение дорожной карты: ESLint+Prettier — secondary,
-        // не должны попадать в дефолт нового проекта без явного выбора пользователя.
+    it('only defaults to primary OXC + Pint, not legacy ESLint/Prettier or external-binary checks', function () {
+        // Замок на осознанные решения дорожной карты:
+        // - ESLint+Prettier — secondary, не должны попадать в дефолт без явного выбора;
+        // - gitleaks требует отдельного бинарника (не npm/composer-зависимость),
+        //   поэтому default:true для него ломал бы первый же sync на чистой машине.
         expect(ChecksCatalog::defaults())
-            ->toBe(['pint', 'oxlint', 'oxfmt', 'gitleaks'])
+            ->toBe(['pint', 'oxlint', 'oxfmt'])
             ->not->toContain('eslint')
-            ->not->toContain('prettier');
+            ->not->toContain('prettier')
+            ->not->toContain('gitleaks');
+    });
+
+    it('flags gitleaks as requiring an external binary, not bundled via npm/composer', function () {
+        expect(ChecksCatalog::all()['gitleaks']['requiresBinary'])->toBeTrue()
+            ->and(ChecksCatalog::all()['gitleaks']['default'])->toBeFalse();
     });
 
     it('does not default-enable commitlint, since it requires repo-level config', function () {

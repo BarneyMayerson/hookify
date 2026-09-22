@@ -13,18 +13,29 @@ namespace App\Support;
  *     default: bool,
  *     hook: 'pre-commit'|'commit-msg',
  *     requiresConfig: bool,
+ *     requiresBinary: bool,
  * }
  */
-class ChecksCatalog
+final class ChecksCatalog
 {
     /**
      * Фиксированный список — пользователь включает/выключает готовые чеки
      * тогглами, а не вводит свои команды, поэтому это код, а не таблица БД.
      *
-     * requiresConfig=true — чек не работает "из коробки" на дефолтах,
-     * ему нужен собственный конфиг-файл в целевом репозитории (иначе
-     * первый же коммит упадёт с ошибкой конфигурации, а не находкой стиля).
-     * Конструктор должен явно предупреждать об этом при включении.
+     * requiresConfig=true — чеку нужен собственный конфиг-файл (и, как
+     * правило, собственная зависимость в package.json/composer.json)
+     * в целевом репозитории — без него первый же коммит упадёт с ошибкой
+     * настройки, а не находкой стиля.
+     *
+     * requiresBinary=true — чек не входит в node_modules/vendor проекта,
+     * это отдельный бинарник (например, Go-программа), который нужно
+     * поставить в систему вручную — в отличие от pint/oxlint/oxfmt,
+     * гарантированно доступных через composer/npm любого проекта на этом
+     * стеке. Именно поэтому такие чеки не входят в default: true — при
+     * первом hookify sync у типичного нового проекта бинарника ещё нет,
+     * и хук будет валить каждый коммит "command not found", а не пользой.
+     *
+     * Оба флага — сигнал конструктору показать предупреждение при включении.
      *
      * @return array<string, Check>
      */
@@ -39,6 +50,7 @@ class ChecksCatalog
                 'default' => true,
                 'hook' => 'pre-commit',
                 'requiresConfig' => false,
+                'requiresBinary' => false,
             ],
             'phpstan' => [
                 'label' => 'PHPStan',
@@ -48,6 +60,7 @@ class ChecksCatalog
                 'default' => false,
                 'hook' => 'pre-commit',
                 'requiresConfig' => false,
+                'requiresBinary' => false,
             ],
             'oxlint' => [
                 'label' => 'OXC — oxlint',
@@ -57,6 +70,7 @@ class ChecksCatalog
                 'default' => true,
                 'hook' => 'pre-commit',
                 'requiresConfig' => false,
+                'requiresBinary' => false,
             ],
             'oxfmt' => [
                 'label' => 'OXC — oxfmt',
@@ -66,6 +80,7 @@ class ChecksCatalog
                 'default' => true,
                 'hook' => 'pre-commit',
                 'requiresConfig' => false,
+                'requiresBinary' => false,
             ],
             'eslint' => [
                 'label' => 'ESLint',
@@ -75,6 +90,7 @@ class ChecksCatalog
                 'default' => false,
                 'hook' => 'pre-commit',
                 'requiresConfig' => false,
+                'requiresBinary' => false,
             ],
             'prettier' => [
                 'label' => 'Prettier',
@@ -84,15 +100,20 @@ class ChecksCatalog
                 'default' => false,
                 'hook' => 'pre-commit',
                 'requiresConfig' => false,
+                'requiresBinary' => false,
             ],
             'gitleaks' => [
                 'label' => 'Secret scanning (gitleaks)',
                 'ecosystem' => 'universal',
                 'command' => 'gitleaks protect --staged --redact',
                 'tier' => 'primary',
-                'default' => true,
+                // Внешний Go-бинарник, не npm/composer-зависимость — не может
+                // быть дефолтом, иначе первый sync на чистой машине ломает
+                // все коммиты фразой "gitleaks: not found".
+                'default' => false,
                 'hook' => 'pre-commit',
                 'requiresConfig' => false,
+                'requiresBinary' => true,
             ],
             'commitlint' => [
                 'label' => 'Commit message format (commitlint)',
@@ -104,6 +125,7 @@ class ChecksCatalog
                 'default' => false,
                 'hook' => 'commit-msg',
                 'requiresConfig' => true,
+                'requiresBinary' => false,
             ],
         ];
     }
