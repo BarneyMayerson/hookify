@@ -16,10 +16,22 @@ class ProjectController extends Controller
 {
     public function index(Request $request): Response
     {
+        $projects = $request->user()->projects()
+            ->with('rules')
+            ->latest()
+            ->get(['id', 'name', 'api_token_prefix', 'last_synced_at']);
+
         return Inertia::render('Projects/Index', [
-            'projects' => $request->user()->projects()
-                ->latest()
-                ->get(['id', 'name', 'api_token_prefix', 'last_synced_at']),
+            'projects' => $projects->map(fn (Project $project) => [
+                'id' => $project->id,
+                'name' => $project->name,
+                'api_token_prefix' => $project->api_token_prefix,
+                'last_synced_at' => $project->last_synced_at,
+                'enabledIds' => $project->rules->pluck('check_id'),
+            ]),
+            'catalog' => collect(ChecksCatalog::all())
+                ->map(fn (array $check, string $id) => ['id' => $id, 'label' => $check['label']])
+                ->values(),
             'apiBase' => rtrim(config('app.url'), '/').'/api/v1',
         ]);
     }

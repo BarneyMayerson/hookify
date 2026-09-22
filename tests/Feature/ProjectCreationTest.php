@@ -57,6 +57,21 @@ describe('Project creation', function () {
         );
     });
 
+    it('exposes the check catalog and each project\'s enabled ids for the table view', function () {
+        $user = User::factory()->create();
+        [$project] = Project::createWithToken($user, 'Acme');
+
+        $response = actingAs($user)->get(route('projects.index'));
+
+        $response->assertInertia(
+            fn ($page) => $page
+                ->component('Projects/Index')
+                ->has('catalog', count(ChecksCatalog::all()))
+                ->where('projects.0.id', $project->id)
+                ->where('projects.0.enabledIds', ChecksCatalog::defaults()),
+        );
+    });
+
     it('exposes the API base derived from app config', function () {
         $user = User::factory()->create();
 
