@@ -5,9 +5,6 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Settings;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Settings\ProfileDeleteRequest;
-use App\Http\Requests\Settings\ProfileUpdateRequest;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -18,37 +15,25 @@ class ProfileController extends Controller
 {
     /**
      * Show the user's profile settings page.
+     *
+     * Read-only: name/email/avatar are synced from GitHub on every login
+     * (see GitHubController::callback) and are not editable here.
      */
-    public function edit(Request $request): Response
+    public function edit(): Response
     {
-        return Inertia::render('settings/Profile', [
-            'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
-            'status' => $request->session()->get('status'),
-        ]);
-    }
-
-    /**
-     * Update the user's profile information.
-     */
-    public function update(ProfileUpdateRequest $request): RedirectResponse
-    {
-        $request->user()->fill($request->validated());
-
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
-        }
-
-        $request->user()->save();
-
-        Inertia::flash('toast', ['type' => 'success', 'message' => __('Profile updated.')]);
-
-        return to_route('profile.edit');
+        return Inertia::render('settings/Profile');
     }
 
     /**
      * Delete the user's profile.
+     *
+     * No password confirmation: GitHub OAuth is the only auth method in
+     * this app, so there is no credential left to re-check — the `auth`
+     * middleware already guarantees only the signed-in user reaches this
+     * route. The frontend's "type DELETE to confirm" is a mistake-guard,
+     * not a security boundary.
      */
-    public function destroy(ProfileDeleteRequest $request): RedirectResponse
+    public function destroy(Request $request): RedirectResponse
     {
         $user = $request->user();
 

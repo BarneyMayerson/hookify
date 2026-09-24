@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import { Form } from '@inertiajs/vue3';
-import { useTemplateRef } from 'vue';
+import { computed, ref } from 'vue';
 import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
 import Heading from '@/components/Heading.vue';
 import InputError from '@/components/InputError.vue';
-import PasswordInput from '@/components/PasswordInput.vue';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -16,9 +15,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
-const passwordInput = useTemplateRef('passwordInput');
+const confirmationText = ref('');
+const isConfirmed = computed(() => confirmationText.value === 'DELETE');
 </script>
 
 <template>
@@ -37,13 +38,18 @@ const passwordInput = useTemplateRef('passwordInput');
       </div>
       <Dialog>
         <DialogTrigger as-child>
-          <Button variant="destructive" data-test="delete-user-button">Delete account</Button>
+          <Button
+            variant="destructive"
+            data-test="delete-user-button"
+            @click="confirmationText = ''"
+          >
+            Delete account
+          </Button>
         </DialogTrigger>
         <DialogContent>
           <Form
             v-bind="ProfileController.destroy.form()"
             reset-on-success
-            @error="() => passwordInput?.focus()"
             :options="{
               preserveScroll: true,
             }"
@@ -54,18 +60,17 @@ const passwordInput = useTemplateRef('passwordInput');
               <DialogTitle>Are you sure you want to delete your account?</DialogTitle>
               <DialogDescription>
                 Once your account is deleted, all of its resources and data will also be permanently
-                deleted. Please enter your password to confirm you would like to permanently delete
-                your account.
+                deleted. Type <span class="font-mono font-semibold">DELETE</span> below to confirm.
               </DialogDescription>
             </DialogHeader>
 
             <div class="grid gap-2">
-              <Label for="password" class="sr-only">Password</Label>
-              <PasswordInput
-                id="password"
-                name="password"
-                ref="passwordInput"
-                placeholder="Password"
+              <Label for="confirmation" class="sr-only">Type DELETE to confirm</Label>
+              <Input
+                id="confirmation"
+                v-model="confirmationText"
+                autocomplete="off"
+                placeholder="Type DELETE to confirm"
               />
               <InputError :message="errors.password" />
             </div>
@@ -78,6 +83,7 @@ const passwordInput = useTemplateRef('passwordInput');
                     () => {
                       clearErrors();
                       reset();
+                      confirmationText = '';
                     }
                   "
                 >
@@ -88,7 +94,7 @@ const passwordInput = useTemplateRef('passwordInput');
               <Button
                 type="submit"
                 variant="destructive"
-                :disabled="processing"
+                :disabled="processing || !isConfirmed"
                 data-test="confirm-delete-user-button"
               >
                 Delete account
