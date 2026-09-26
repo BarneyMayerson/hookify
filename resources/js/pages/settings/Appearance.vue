@@ -2,14 +2,12 @@
 import { Head } from '@inertiajs/vue3';
 import AppearanceTabs from '@/components/AppearanceTabs.vue';
 import Heading from '@/components/Heading.vue';
-import { edit } from '@/routes/appearance';
 
 defineOptions({
   layout: {
     breadcrumbs: [
       {
         title: 'Appearance settings',
-        href: edit(),
       },
     ],
   },
@@ -19,14 +17,20 @@ defineOptions({
 <template>
   <Head title="Appearance settings" />
 
-  <h1 class="sr-only">Appearance settings</h1>
+  <div class="mx-auto max-w-4xl space-y-8 p-4 sm:p-6">
+    <!-- Header -->
+    <div class="border-b border-slate-200 pb-5 dark:border-slate-800">
+      <Heading
+        title="Appearance Settings"
+        description="Customize the appearance settings for your account and workspace interface."
+      />
+    </div>
 
-  <div class="space-y-6">
-    <Heading
-      variant="small"
-      title="Appearance settings"
-      description="Update the appearance settings for your account"
-    />
-    <AppearanceTabs />
+    <!-- Appearance Options Card -->
+    <div
+      class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900"
+    >
+      <AppearanceTabs />
+    </div>
   </div>
 </template>

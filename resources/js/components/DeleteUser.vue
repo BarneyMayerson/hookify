@@ -2,7 +2,6 @@
 import { Form } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
-import Heading from '@/components/Heading.vue';
 import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
 import {
@@ -17,25 +16,26 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { AlertTriangle } from '@lucide/vue';
 
 const confirmationText = ref('');
 const isConfirmed = computed(() => confirmationText.value === 'DELETE');
 </script>
 
 <template>
-  <div class="space-y-6">
-    <Heading
-      variant="small"
-      title="Delete account"
-      description="Delete your account and all of its resources"
-    />
-    <div
-      class="space-y-4 rounded-lg border border-red-100 bg-red-50 p-4 dark:border-red-200/10 dark:bg-red-700/10"
-    >
-      <div class="relative space-y-0.5 text-red-600 dark:text-red-100">
-        <p class="font-medium">Warning</p>
-        <p class="text-sm">Please proceed with caution, this cannot be undone.</p>
+  <div class="space-y-4">
+    <div class="flex items-start justify-between gap-4">
+      <div class="space-y-1">
+        <div class="flex items-center gap-2 text-base font-semibold text-red-600 dark:text-red-400">
+          <AlertTriangle class="h-5 w-5 shrink-0" />
+          <span>Delete Account</span>
+        </div>
+        <p class="text-xs text-slate-600 dark:text-slate-400">
+          Permanently remove your account, projects, rules, and active API tokens. This action is
+          irreversible.
+        </p>
       </div>
+
       <Dialog>
         <DialogTrigger as-child>
           <Button
@@ -46,6 +46,7 @@ const isConfirmed = computed(() => confirmationText.value === 'DELETE');
             Delete account
           </Button>
         </DialogTrigger>
+
         <DialogContent>
           <Form
             v-bind="ProfileController.destroy.form()"
@@ -58,9 +59,11 @@ const isConfirmed = computed(() => confirmationText.value === 'DELETE');
           >
             <DialogHeader class="space-y-3">
               <DialogTitle>Are you sure you want to delete your account?</DialogTitle>
-              <DialogDescription>
-                Once your account is deleted, all of its resources and data will also be permanently
-                deleted. Type <span class="font-mono font-semibold">DELETE</span> below to confirm.
+              <DialogDescription class="text-sm text-slate-500 dark:text-slate-400">
+                Once your account is deleted, all of its resources, projects, and rules will be
+                permanently deleted. Please type
+                <span class="font-mono font-bold text-slate-900 dark:text-slate-100">DELETE</span>
+                below to confirm.
               </DialogDescription>
             </DialogHeader>
 
@@ -72,13 +75,16 @@ const isConfirmed = computed(() => confirmationText.value === 'DELETE');
                 autocomplete="off"
                 placeholder="Type DELETE to confirm"
               />
-              <InputError :message="errors.password" />
+              <InputError
+                :message="errors.confirmation || errors.password || Object.values(errors)[0]"
+              />
             </div>
 
-            <DialogFooter class="gap-2">
+            <DialogFooter class="gap-2 sm:gap-0">
               <DialogClose as-child>
                 <Button
-                  variant="secondary"
+                  type="button"
+                  variant="outline"
                   @click="
                     () => {
                       clearErrors();
@@ -97,7 +103,7 @@ const isConfirmed = computed(() => confirmationText.value === 'DELETE');
                 :disabled="processing || !isConfirmed"
                 data-test="confirm-delete-user-button"
               >
-                Delete account
+                Permanently delete account
               </Button>
             </DialogFooter>
           </Form>

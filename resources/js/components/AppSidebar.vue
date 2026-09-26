@@ -21,25 +21,25 @@ import type { NavItem } from '@/types';
 const mainNavItems: NavItem[] = [
   {
     title: 'Dashboard',
-    href: dashboard(),
+    href: dashboard().url,
     icon: LayoutGrid,
   },
   {
     title: 'Projects',
-    href: projectsIndex(),
+    href: projectsIndex().url,
     icon: FolderGit2,
   },
 ];
 
 const footerNavItems: NavItem[] = [
   {
-    title: 'Repository',
-    href: 'https://github.com/laravel/vue-starter-kit',
+    title: 'GitHub Repo',
+    href: 'https://github.com/BarneyMayerson/hookify',
     icon: GitBranch,
   },
   {
     title: 'Documentation',
-    href: 'https://laravel.com/docs/starter-kits#vue',
+    href: '/docs',
     icon: BookOpen,
   },
 ];
@@ -64,7 +64,7 @@ const footerNavItems: NavItem[] = [
     </SidebarContent>
 
     <SidebarFooter>
-      <NavFooter :items="footerNavItems" />
+      <NavFooter v-if="footerNavItems.length" :items="footerNavItems" />
       <NavUser />
     </SidebarFooter>
   </Sidebar>

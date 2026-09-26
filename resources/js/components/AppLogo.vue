@@ -1,17 +1,22 @@
 <script setup lang="ts">
-import { usePage } from '@inertiajs/vue3';
 import AppLogoIcon from '@/components/AppLogoIcon.vue';
-
-const name = usePage().props.name;
 </script>
 
 <template>
-  <div
-    class="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-md"
-  >
-    <AppLogoIcon class="size-5 fill-current text-white dark:text-black" />
-  </div>
-  <div class="ml-1 grid flex-1 text-left text-sm">
-    <span class="mb-0.5 truncate leading-tight font-semibold">{{ name }}</span>
+  <div class="flex items-center gap-2.5">
+    <div
+      class="flex aspect-square size-8 items-center justify-center rounded-lg bg-indigo-600 text-white shadow-sm shadow-indigo-500/30 transition-transform group-hover:scale-105 dark:bg-indigo-500"
+    >
+      <AppLogoIcon class="size-5" />
+    </div>
+
+    <div class="grid flex-1 text-left text-sm leading-tight">
+      <span class="truncate font-bold tracking-tight text-slate-900 dark:text-slate-100">
+        GitHooks <span class="text-indigo-600 dark:text-indigo-400">Hub</span>
+      </span>
+      <span class="truncate text-[10px] font-medium text-slate-500 dark:text-slate-400">
+        Hook Management
+      </span>
+    </div>
   </div>
 </template>
