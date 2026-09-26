@@ -32,7 +32,7 @@ interface ProjectSummary {
   last_synced_at: string | null;
 }
 
-// Пропсы с фоллбэками на случай, если данные еще не проброшены с бэкенда
+// Props with fallbacks in case the data isn't wired up from the backend yet
 const props = withDefaults(
   defineProps<{
     stats?: {
