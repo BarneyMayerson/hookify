@@ -50,13 +50,13 @@ function copyCommand() {
 <template>
   <div class="mx-auto max-w-7xl space-y-8 p-6">
     <div class="flex items-center justify-between gap-6">
-      <h1 class="shrink-0 text-xl font-semibold">Проекты</h1>
+      <h1 class="shrink-0 text-xl font-semibold">Projects</h1>
 
       <form class="flex flex-1 items-center gap-2" @submit.prevent="submit">
         <input
           v-model="form.name"
           type="text"
-          placeholder="Название проекта"
+          placeholder="Project name"
           class="flex-1 rounded border px-3 py-2"
         />
         <button
@@ -64,7 +64,7 @@ function copyCommand() {
           :disabled="form.processing"
           class="shrink-0 rounded bg-black px-4 py-2 text-white disabled:opacity-50"
         >
-          Создать
+          Create
         </button>
       </form>
     </div>
@@ -74,13 +74,12 @@ function copyCommand() {
       v-if="plaintextToken"
       class="rounded-md border border-amber-300 bg-amber-50 p-4 text-sm dark:border-amber-800 dark:bg-amber-950"
     >
-      <p class="font-medium">Сохраните команду — токен в ней показывается один раз.</p>
+      <p class="font-medium">Save this command — the token is shown only once.</p>
       <div class="mt-2 flex items-center gap-2">
         <code
           class="flex-1 overflow-x-auto rounded bg-white px-2 py-1 whitespace-nowrap dark:bg-black"
+          >{{ installCommand }}</code
         >
-          {{ installCommand }}
-        </code>
         <button
           type="button"
           class="shrink-0 rounded bg-amber-600 px-3 py-1 text-white hover:bg-amber-700"
@@ -95,7 +94,7 @@ function copyCommand() {
       <table class="w-full text-sm">
         <thead>
           <tr class="border-b bg-gray-50 text-left dark:bg-gray-900">
-            <th class="px-4 py-2 font-medium">Проект</th>
+            <th class="px-4 py-2 font-medium">Project</th>
             <th
               v-for="check in catalog"
               :key="check.id"
@@ -122,7 +121,7 @@ function copyCommand() {
           </tr>
           <tr v-if="projects.length === 0">
             <td :colspan="catalog.length + 1" class="px-4 py-6 text-center text-gray-500">
-              Проектов пока нет — создайте первый выше.
+              No projects yet — create your first one above.
             </td>
           </tr>
         </tbody>

@@ -32,7 +32,7 @@ const groups = computed(() => {
 const ecosystemLabels: Record<string, string> = {
   php: 'PHP',
   js: 'JS / TS',
-  universal: 'Универсальные',
+  universal: 'Universal',
 };
 
 function submit() {
@@ -43,7 +43,7 @@ function submit() {
 <template>
   <div class="mx-auto max-w-7xl space-y-8 p-6">
     <div>
-      <Link :href="index().url" class="text-sm text-gray-500 hover:underline">&larr; Проекты</Link>
+      <Link :href="index().url" class="text-sm text-gray-500 hover:underline">&larr; Projects</Link>
     </div>
 
     <div>
@@ -81,7 +81,7 @@ function submit() {
                 v-if="check.requiresConfig || check.requiresBinary"
                 class="rounded bg-amber-100 px-2 py-0.5 text-xs text-amber-700 dark:bg-amber-950 dark:text-amber-400"
               >
-                {{ check.requiresBinary ? 'нужна доп. установка' : 'нужен свой конфиг' }}
+                {{ check.requiresBinary ? 'needs extra setup' : 'needs its own config' }}
               </span>
             </div>
             <p
@@ -92,8 +92,8 @@ function submit() {
             >
               {{
                 check.requiresBinary
-                  ? 'Это отдельный бинарник, не npm/composer-зависимость — без него команда упадёт с «command not found» на каждом коммите.'
-                  : 'Без конфига в репозитории этот чек будет падать на каждом коммите.'
+                  ? 'This is a standalone binary, not an npm/composer dependency — without it the command will fail with “command not found” on every commit.'
+                  : 'Without a config file in the repository, this check will fail on every commit.'
               }}
             </p>
           </label>
@@ -105,7 +105,7 @@ function submit() {
         :disabled="form.processing"
         class="rounded bg-black px-4 py-2 text-white disabled:opacity-50"
       >
-        Сохранить
+        Save
       </button>
     </form>
   </div>

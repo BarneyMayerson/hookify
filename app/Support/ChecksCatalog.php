@@ -19,23 +19,25 @@ namespace App\Support;
 final class ChecksCatalog
 {
     /**
-     * Фиксированный список — пользователь включает/выключает готовые чеки
-     * тогглами, а не вводит свои команды, поэтому это код, а не таблица БД.
+     * A fixed list — the user toggles ready-made checks on/off rather than
+     * entering their own commands, so this is code, not a DB table.
      *
-     * requiresConfig=true — чеку нужен собственный конфиг-файл (и, как
-     * правило, собственная зависимость в package.json/composer.json)
-     * в целевом репозитории — без него первый же коммит упадёт с ошибкой
-     * настройки, а не находкой стиля.
+     * requiresConfig=true — the check needs its own config file (and,
+     * typically, its own dependency in package.json/composer.json) in the
+     * target repository — without it the very first commit fails with a
+     * configuration error, not a style finding.
      *
-     * requiresBinary=true — чек не входит в node_modules/vendor проекта,
-     * это отдельный бинарник (например, Go-программа), который нужно
-     * поставить в систему вручную — в отличие от pint/oxlint/oxfmt,
-     * гарантированно доступных через composer/npm любого проекта на этом
-     * стеке. Именно поэтому такие чеки не входят в default: true — при
-     * первом hookify sync у типичного нового проекта бинарника ещё нет,
-     * и хук будет валить каждый коммит "command not found", а не пользой.
+     * requiresBinary=true — the check isn't part of the project's
+     * node_modules/vendor; it's a standalone binary (e.g. a Go program)
+     * that has to be installed on the system by hand — unlike
+     * pint/oxlint/oxfmt, which are guaranteed available via composer/npm
+     * on any project on this stack. That's exactly why such checks aren't
+     * default: true — on a typical new project's first hookify sync the
+     * binary isn't there yet, and the hook would fail every commit with
+     * "command not found" instead of providing value.
      *
-     * Оба флага — сигнал конструктору показать предупреждение при включении.
+     * Both flags are a signal for the constructor to show a warning when
+     * the check is enabled.
      *
      * @return array<string, Check>
      */
@@ -107,9 +109,9 @@ final class ChecksCatalog
                 'ecosystem' => 'universal',
                 'command' => 'gitleaks protect --staged --redact',
                 'tier' => 'primary',
-                // Внешний Go-бинарник, не npm/composer-зависимость — не может
-                // быть дефолтом, иначе первый sync на чистой машине ломает
-                // все коммиты фразой "gitleaks: not found".
+                // An external Go binary, not an npm/composer dependency —
+                // can't be a default, or the first sync on a clean machine
+                // breaks every commit with "gitleaks: not found".
                 'default' => false,
                 'hook' => 'pre-commit',
                 'requiresConfig' => false,
@@ -118,8 +120,9 @@ final class ChecksCatalog
             'commitlint' => [
                 'label' => 'Commit message format (commitlint)',
                 'ecosystem' => 'universal',
-                // $1 — путь к файлу с сообщением коммита, его передаёт сам git
-                // при вызове commit-msg хука, а не CLI Hookify.
+                // $1 — the path to the commit message file, passed by git
+                // itself when invoking the commit-msg hook, not by the
+                // Hookify CLI.
                 'command' => 'npx --no-install commitlint --edit "$1"',
                 'tier' => 'primary',
                 'default' => false,
@@ -136,7 +139,7 @@ final class ChecksCatalog
     }
 
     /**
-     * Id чеков, включённых по умолчанию для нового проекта.
+     * Ids of checks enabled by default for a new project.
      *
      * @return list<string>
      */
@@ -149,9 +152,9 @@ final class ChecksCatalog
     }
 
     /**
-     * Фильтрует каталог по переданным id, сохраняя порядок каталога
-     * (не порядок, в котором id пришли извне) — манифест должен быть
-     * детерминированным независимо от порядка строк в project_rules.
+     * Filters the catalog by the given ids, preserving catalog order (not
+     * the order the ids arrived in) — the manifest must be deterministic
+     * regardless of row order in project_rules.
      *
      * @param  iterable<string>  $ids
      * @return array<string, Check>

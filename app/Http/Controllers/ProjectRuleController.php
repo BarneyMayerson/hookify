@@ -15,13 +15,13 @@ class ProjectRuleController extends Controller
 {
     public function update(Request $request, Project $project): RedirectResponse
     {
-        // 404, не 403 — не подтверждаем чужому пользователю сам факт
-        // существования проекта с таким id.
+        // 404, not 403 — don't confirm to another user that a project
+        // with this id even exists.
         abort_unless($project->user_id === $request->user()->id, 404);
 
         $validated = $request->validate([
-            // 'present', не 'sometimes': пустой массив — осознанный выбор
-            // "выключить все чеки", а не "поле не передали".
+            // 'present', not 'sometimes': an empty array is a deliberate
+            // "disable every check", not "the field wasn't sent".
             'check_ids' => ['present', 'array'],
             'check_ids.*' => ['string', Rule::in(array_keys(ChecksCatalog::all()))],
         ]);

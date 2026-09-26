@@ -32,6 +32,9 @@ class ProjectController extends Controller
             'catalog' => collect(ChecksCatalog::all())
                 ->map(fn (array $check, string $id) => ['id' => $id, 'label' => $check['label']])
                 ->values(),
+            // Not relying on the CLI's default (HOOKIFY_API is hardcoded to
+            // https://hookify.dev/api/v1) — the command must point at
+            // whichever server it was copied from (dev .lan, prod, etc.).
             'apiBase' => rtrim(config('app.url'), '/').'/api/v1',
         ]);
     }
@@ -64,9 +67,9 @@ class ProjectController extends Controller
 
         [, $token] = Project::createWithToken($request->user(), $validated['name']);
 
-        // Токен кладём во flash, а не в проп страницы: переживает только
-        // один редирект, при обновлении/повторном заходе на страницу исчезает —
-        // повторно достать его с сервера уже нельзя (хранится только хеш).
+        // The token goes into flash, not a page prop: it survives exactly
+        // one redirect and disappears on refresh/revisit — it can't be
+        // fetched from the server again anyway, since only its hash is stored.
         return Redirect::route('projects.index')->with('plaintext_token', $token);
     }
 }

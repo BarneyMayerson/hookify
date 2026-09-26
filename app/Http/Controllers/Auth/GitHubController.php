@@ -26,8 +26,8 @@ class GitHubController extends Controller
             ['github_id' => $githubUser->getId()],
             [
                 'name' => $githubUser->getName() ?: $githubUser->getNickname(),
-                // GitHub может скрыть email (настройка приватности) — тогда null.
-                // Уникальный fallback вместо падения на NOT NULL/unique constraint.
+                // GitHub can hide the email (a privacy setting) — then it's null.
+                // A unique fallback instead of failing a NOT NULL/unique constraint.
                 'email' => $githubUser->getEmail()
                     ?? "{$githubUser->getId()}+github@users.noreply.hookify.dev",
                 'github_nickname' => $githubUser->getNickname(),

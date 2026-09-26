@@ -39,15 +39,17 @@ class Project extends Model
      */
     public function rules(): HasMany
     {
-        // Явный ORDER BY — без него MySQL не гарантирует порядок.
+        // Explicit ORDER BY — without it MySQL doesn't guarantee insertion
+        // order on SELECT, and the constructor UI and this test rely on it.
         return $this->hasMany(ProjectRule::class)->orderBy('id');
     }
 
     /**
-     * Создаёт проект и возвращает [проект, plaintext-токен].
-     * Токен показывается пользователю ровно один раз — в БД лежит только хеш.
-     * Новому проекту сразу засеваются дефолтные чеки из каталога — иначе
-     * ManifestController отдал бы пустой pre-commit до первого визита в конструктор.
+     * Creates a project and returns [project, plaintext token].
+     * The token is shown to the user exactly once — only its hash is stored.
+     * A new project is immediately seeded with the catalog's default checks —
+     * otherwise ManifestController would return an empty pre-commit hook
+     * until the user's first visit to the constructor.
      *
      * @return array{0: self, 1: string}
      */
