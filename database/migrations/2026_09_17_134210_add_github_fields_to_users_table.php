@@ -12,7 +12,7 @@ return new class extends Migration
             $table->string('github_id')->nullable()->unique()->after('email');
             $table->string('github_nickname')->nullable()->after('github_id');
             $table->string('github_avatar')->nullable()->after('github_nickname');
-            // GitHub OAuth = вход без пароля.
+            // GitHub OAuth login allows passwordless authentication.
             $table->string('password')->nullable()->change();
         });
     }

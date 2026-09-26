@@ -11,9 +11,9 @@ return new class extends Migration
         Schema::create('project_rules', function (Blueprint $table) {
             $table->id();
             $table->foreignId('project_id')->constrained()->cascadeOnDelete();
-            // Ссылается на ключ App\Support\ChecksCatalog, не на отдельную таблицу:
-            // каталог чеков фиксированный (toggle-список из конструктора),
-            // а не пользовательский произвольный ввод, поэтому FK тут не нужен.
+            // References a key from App\Support\ChecksCatalog rather than a dedicated table:
+            // the catalog is fixed (a predefined toggle list from the constructor)
+            // rather than arbitrary user input, so an FK is not required here.
             $table->string('check_id');
             $table->timestamps();
 

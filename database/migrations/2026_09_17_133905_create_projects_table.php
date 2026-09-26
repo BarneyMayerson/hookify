@@ -13,7 +13,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->string('name');
             $table->string('api_token_hash', 64)->unique();
-            // Первые символы токена для отображения в UI ("hk_live_a1b2…").
+            // First characters of the token for UI display ("hk_live_a1b2...").
             $table->string('api_token_prefix', 16);
             $table->timestamp('last_synced_at')->nullable();
             $table->timestamps();
