@@ -12,6 +12,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->string('name');
+            $table->unsignedBigInteger('github_repo_id')->nullable();
+            $table->string('github_repo_full_name')->nullable();
             $table->string('api_token_hash', 64)->unique();
             // First characters of the token for UI display ("hk_live_a1b2...").
             $table->string('api_token_prefix', 16);

@@ -9,17 +9,25 @@ use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Socialite\Facades\Socialite;
+use Laravel\Socialite\Two\GithubProvider;
+use Laravel\Socialite\Two\User as SocialiteUser;
 use Symfony\Component\HttpFoundation\RedirectResponse as SymfonyRedirectResponse;
 
 class GitHubController extends Controller
 {
     public function redirect(): SymfonyRedirectResponse
     {
-        return Socialite::driver('github')->redirect();
+        /** @var GithubProvider $driver */
+        $driver = Socialite::driver('github');
+
+        // 'repo' — otherwise the GitHub API only returns public repositories
+        // when we later fetch the list for project binding.
+        return $driver->scopes(['repo'])->redirect();
     }
 
     public function callback(): RedirectResponse
     {
+        /** @var SocialiteUser $githubUser */
         $githubUser = Socialite::driver('github')->user();
 
         $user = User::updateOrCreate(
@@ -32,6 +40,9 @@ class GitHubController extends Controller
                     ?? "{$githubUser->getId()}+github@users.noreply.hookify.dev",
                 'github_nickname' => $githubUser->getNickname(),
                 'github_avatar' => $githubUser->getAvatar(),
+                // Used later to list the user's repos for project binding.
+                // Must be `encrypted`-cast and $hidden on User — see note there.
+                'github_token' => $githubUser->token,
             ],
         );
 

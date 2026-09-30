@@ -2,7 +2,9 @@
 
 use App\Http\Controllers\Auth\GitHubController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\GitHubRepositoryController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\ProjectRepositoryController;
 use App\Http\Controllers\ProjectRuleController;
 use Illuminate\Support\Facades\Route;
 
@@ -15,6 +17,9 @@ Route::middleware(['auth'])->group(function () {
     Route::post('projects', [ProjectController::class, 'store'])->name('projects.store');
     Route::get('projects/{project}', [ProjectController::class, 'show'])->name('projects.show');
     Route::put('projects/{project}/rules', [ProjectRuleController::class, 'update'])->name('projects.rules.update');
+    Route::patch('projects/{project}/repository', [ProjectRepositoryController::class, 'update'])->name('projects.repository.update');
+
+    Route::get('github/repositories', [GitHubRepositoryController::class, 'index'])->name('github.repositories');
 });
 
 Route::get('auth/github/redirect', [GitHubController::class, 'redirect'])->name('auth.github.redirect');
