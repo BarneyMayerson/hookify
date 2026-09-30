@@ -40,7 +40,10 @@ describe('GitHub repository listing', function () {
                 ],
             ]);
 
-        Http::assertSent(fn ($request) => $request->hasHeader('Authorization', 'Bearer gh_token_123'));
+        Http::assertSent(fn ($request) => $request->hasHeader('Authorization', 'Bearer gh_token_123') &&
+            $request->hasHeader('User-Agent', 'Hookify-App') &&
+            $request->hasHeader('X-GitHub-Api-Version', '2026-03-10')
+        );
     });
 
     it('returns 409 when the github token was revoked', function () {

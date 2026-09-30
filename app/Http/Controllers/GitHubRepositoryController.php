@@ -21,6 +21,10 @@ class GitHubRepositoryController extends Controller
         }
 
         $response = Http::withToken($user->github_token)
+            ->withHeaders([
+                'User-Agent' => 'Hookify-App',
+                'X-GitHub-Api-Version' => '2026-03-10',
+            ])
             ->acceptJson()
             ->get('https://api.github.com/user/repos', [
                 'sort' => 'updated',
