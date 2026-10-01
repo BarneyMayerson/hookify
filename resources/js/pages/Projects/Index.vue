@@ -1,21 +1,21 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { Link, useForm, usePage } from '@inertiajs/vue3';
-import { Check, Copy, CheckCheck, Plus, Terminal, FolderPlus } from '@lucide/vue';
+import {
+  Check,
+  Copy,
+  Plus,
+  Terminal,
+  FolderPlus,
+  ArrowRight,
+  ShieldCheck,
+  Clock,
+} from '@lucide/vue';
+import GithubRepoPicker from '@/components/Projects/GithubRepoPicker.vue';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { show, store } from '@/routes/projects';
-
-interface CatalogEntry {
-  id: string;
-  label: string;
-}
-
-interface Project {
-  id: number;
-  name: string;
-  api_token_prefix: string;
-  last_synced_at: string | null;
-  enabledIds: string[];
-}
+import type { Project, CatalogEntry } from '@/types';
 
 const props = defineProps<{
   projects: Project[];
@@ -56,141 +56,110 @@ function copyCommand() {
 </script>
 
 <template>
-  <div class="mx-auto max-w-7xl space-y-8 p-6">
-    <!-- Header & Create Form -->
-    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+  <div class="space-y-6 p-6">
+    <div class="flex items-center justify-between">
       <div>
-        <h1 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
-          Projects
-        </h1>
-        <p class="text-sm text-slate-500 dark:text-slate-400">
-          Manage your repositories and configured Git hooks across teams.
+        <h1 class="text-2xl font-bold tracking-tight">Projects</h1>
+        <p class="text-sm text-slate-500">
+          Manage Git hook configurations and repository bindings for your projects.
         </p>
       </div>
-
-      <form @submit.prevent="submit" class="flex items-start gap-2 sm:max-w-md">
-        <div class="flex-1 space-y-1">
-          <input
-            v-model="form.name"
-            type="text"
-            placeholder="New project name..."
-            class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder-slate-400 transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:focus:ring-indigo-500/30"
-            :class="{ 'border-red-500 dark:border-red-500': form.errors.name }"
-          />
-          <p v-if="form.errors.name" class="text-xs text-red-600 dark:text-red-400">
-            {{ form.errors.name }}
-          </p>
-        </div>
-
-        <button
-          type="submit"
-          :disabled="form.processing || !form.name.trim()"
-          class="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          <Plus class="h-4 w-4" />
-          Create
-        </button>
-      </form>
     </div>
 
-    <!-- Token Flash Banner -->
+    <!-- Token Banner After Project Creation -->
     <div
       v-if="plaintextToken"
-      class="rounded-xl border border-amber-300/80 bg-amber-50/80 p-4 text-sm text-amber-900 shadow-sm backdrop-blur-sm transition-all dark:border-amber-800/60 dark:bg-amber-950/40 dark:text-amber-200"
+      class="rounded-xl border border-emerald-200 bg-emerald-50/50 p-4 dark:border-emerald-900/50 dark:bg-emerald-950/20"
     >
-      <div class="flex items-center gap-2 font-semibold">
-        <Terminal class="h-4 w-4 text-amber-600 dark:text-amber-400" />
-        <span>Save your API token — it won't be shown again!</span>
+      <div class="flex items-start justify-between gap-4">
+        <div class="space-y-1">
+          <p class="text-sm font-semibold text-emerald-900 dark:text-emerald-300">
+            Project Created Successfully!
+          </p>
+          <p class="text-xs text-emerald-700 dark:text-emerald-400">
+            Copy this command to initialize and sync Git hooks locally in your repository:
+          </p>
+        </div>
+        <Button variant="outline" size="sm" class="shrink-0 gap-1.5" @click="copyCommand">
+          <Check v-if="isCopied" class="size-4 text-emerald-600" />
+          <Copy v-else class="size-4" />
+          {{ isCopied ? 'Copy CLI Command' : 'Copy' }}
+        </Button>
       </div>
-      <p class="mt-1 text-xs text-amber-700 dark:text-amber-300">
-        Run this command inside your target repository to sync your configured hooks:
-      </p>
-
-      <div class="mt-3 flex flex-col items-stretch gap-2 sm:flex-row sm:items-center">
-        <code
-          class="flex-1 overflow-x-auto rounded-lg border border-amber-200 bg-white px-3 py-2 font-mono text-xs whitespace-nowrap text-slate-800 dark:border-amber-900 dark:bg-slate-900 dark:text-slate-200"
-        >
-          {{ installCommand }}
-        </code>
-        <!-- Зафиксировали ширину кнопки через w-[135px] и добавили justify-center -->
-        <button
-          type="button"
-          class="inline-flex w-33.75 shrink-0 items-center justify-center gap-1.5 rounded-lg bg-amber-600 py-2 text-xs font-medium text-white transition-colors hover:bg-amber-500"
-          @click="copyCommand"
-        >
-          <CheckCheck v-if="isCopied" class="h-3.5 w-3.5" />
-          <Copy v-else class="h-3.5 w-3.5" />
-          <span>{{ isCopied ? 'Copied!' : 'Copy Command' }}</span>
-        </button>
+      <div
+        class="mt-3 flex items-center gap-2 overflow-x-auto rounded-lg bg-slate-950 p-3 font-mono text-xs text-emerald-400"
+      >
+        <Terminal class="size-4 shrink-0 text-slate-500" />
+        <code>{{ installCommand }}</code>
       </div>
     </div>
 
-    <!-- Projects Matrix Table -->
-    <div
-      class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
+    <!-- Create Project Form -->
+    <form
+      class="bg-card flex items-center gap-3 rounded-xl border p-4 shadow-sm"
+      @submit.prevent="submit"
     >
-      <div class="overflow-x-auto">
-        <table class="w-full text-left text-sm">
-          <thead>
-            <tr
-              class="border-b border-slate-200 bg-slate-50/70 dark:border-slate-800 dark:bg-slate-800/50"
-            >
-              <th class="px-5 py-3 font-medium text-slate-700 dark:text-slate-300">Project</th>
-              <th
-                v-for="check in catalog"
-                :key="check.id"
-                :title="check.label"
-                class="px-3 py-3 text-center font-mono text-xs font-semibold tracking-wider whitespace-nowrap text-slate-500 uppercase dark:text-slate-400"
-              >
-                {{ check.id }}
-              </th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-slate-200 dark:divide-slate-800">
-            <tr
-              v-for="project in projects"
-              :key="project.id"
-              class="transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-800/30"
-            >
-              <td class="px-5 py-3.5">
-                <Link
-                  :href="show(project.id).url"
-                  class="font-semibold text-slate-900 transition-colors hover:text-indigo-600 dark:text-slate-100 dark:hover:text-indigo-400"
-                >
-                  {{ project.name }}
-                </Link>
-                <div class="font-mono text-xs text-slate-400 dark:text-slate-500">
-                  {{ project.api_token_prefix }}…
-                </div>
-              </td>
-              <td v-for="check in catalog" :key="check.id" class="px-3 py-3.5 text-center">
-                <Check
-                  v-if="project.enabledIds.includes(check.id)"
-                  class="mx-auto h-4 w-4 text-emerald-500"
-                />
-                <span v-else class="font-mono text-xs text-slate-300 dark:text-slate-700">—</span>
-              </td>
-            </tr>
+      <FolderPlus class="size-5 shrink-0 text-indigo-600" />
+      <Input
+        v-model="form.name"
+        type="text"
+        placeholder="New Project Name..."
+        class="max-w-xs"
+        :disabled="form.processing"
+      />
+      <Button
+        type="submit"
+        size="sm"
+        class="gap-1.5"
+        :disabled="form.processing || !form.name.trim()"
+      >
+        <Plus class="size-4" />
+        Create Project
+      </Button>
+    </form>
 
-            <!-- Empty State -->
-            <tr v-if="projects.length === 0">
-              <td :colspan="catalog.length + 1" class="px-6 py-12 text-center">
-                <div class="mx-auto flex max-w-xs flex-col items-center justify-center text-center">
-                  <div class="mb-3 rounded-full bg-slate-100 p-3 text-slate-400 dark:bg-slate-800">
-                    <FolderPlus class="h-6 w-6" />
-                  </div>
-                  <p class="text-sm font-medium text-slate-900 dark:text-slate-100">
-                    No projects yet
-                  </p>
-                  <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                    Create your first project above to generate a sync token and start configuring
-                    hooks.
-                  </p>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+    <!-- Projects Grid -->
+    <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div
+        v-for="project in projects"
+        :key="project.id"
+        class="bg-card flex flex-col justify-between rounded-xl border p-5 shadow-sm transition-all hover:shadow-md"
+      >
+        <div class="space-y-3">
+          <div class="flex items-start justify-between gap-2">
+            <div>
+              <h3 class="leading-none font-semibold">{{ project.name }}</h3>
+              <p class="mt-1 font-mono text-[11px] text-slate-400">
+                token: {{ project.api_token_prefix }}...
+              </p>
+            </div>
+          </div>
+
+          <!-- Stats & Last Synced Info -->
+          <div class="flex flex-wrap items-center gap-2 pt-2 text-xs text-slate-500">
+            <div class="flex items-center gap-1">
+              <ShieldCheck class="size-3.5 text-indigo-500" />
+              <span>Rules: {{ project.enabledIds?.length ?? 0 }}</span>
+            </div>
+            <span>•</span>
+            <div class="flex items-center gap-1">
+              <Clock class="size-3.5 text-slate-400" />
+              <span>{{ project.last_synced_at || 'Never synced' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom Bar: GitHub Repo Picker & Link to Project Details -->
+        <div class="mt-5 flex items-center justify-between border-t pt-4">
+          <GithubRepoPicker :project="project" />
+
+          <Button as-child variant="ghost" size="sm" class="gap-1 text-xs">
+            <Link :href="show(project.id).url">
+              View Rules
+              <ArrowRight class="size-3.5" />
+            </Link>
+          </Button>
+        </div>
       </div>
     </div>
   </div>

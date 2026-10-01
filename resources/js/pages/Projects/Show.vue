@@ -1,21 +1,14 @@
 <script setup lang="ts">
-import { Link, useForm } from '@inertiajs/vue3';
 import { computed } from 'vue';
+import { Link, useForm } from '@inertiajs/vue3';
 import { ArrowLeft, Save, AlertTriangle } from '@lucide/vue';
+import GithubRepoPicker from '@/components/Projects/GithubRepoPicker.vue';
 import { index } from '@/routes/projects';
 import { update } from '@/routes/projects/rules';
-
-interface Check {
-  id: string;
-  label: string;
-  ecosystem: 'php' | 'js' | 'universal';
-  tier: 'primary' | 'secondary';
-  requiresConfig: boolean;
-  requiresBinary: boolean;
-}
+import type { Project, Check } from '@/types';
 
 const props = defineProps<{
-  project: { id: number; name: string; api_token_prefix: string };
+  project: Project;
   catalog: Check[];
   enabledIds: string[];
 }>();
@@ -24,6 +17,7 @@ const form = useForm({
   check_ids: [...props.enabledIds],
 });
 
+// Group catalog checks by ecosystem
 const groups = computed(() => {
   const byEcosystem: Record<string, Check[]> = { php: [], js: [], universal: [] };
   for (const check of props.catalog) {
@@ -59,7 +53,7 @@ function submit() {
           <ArrowLeft class="h-3.5 w-3.5" />
           Back to Projects
         </Link>
-        <div class="flex items-center gap-3 pt-3">
+        <div class="flex flex-wrap items-center gap-3 pt-3">
           <h1 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
             {{ project.name }}
           </h1>
@@ -71,12 +65,16 @@ function submit() {
         </div>
       </div>
 
+      <!-- Action Buttons -->
       <div class="flex items-center gap-3">
+        <!-- GitHub Repo Picker -->
+        <GithubRepoPicker :project="project" />
+
         <button
           type="button"
           @click="submit"
           :disabled="form.processing || !form.isDirty"
-          class="inline-flex w-[120px] items-center justify-center gap-2 rounded-lg bg-indigo-600 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
+          class="inline-flex w-30 items-center justify-center gap-2 rounded-lg bg-indigo-600 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <Save class="h-4 w-4" />
           <span>{{ form.processing ? 'Saving...' : 'Save Rules' }}</span>
