@@ -19,13 +19,18 @@ class ProjectController extends Controller
         $projects = $request->user()->projects()
             ->with('rules')
             ->latest()
-            ->get(['id', 'name', 'api_token_prefix', 'last_synced_at']);
+            ->get([
+                'id', 'name', 'api_token_prefix', 'github_repo_id',
+                'github_repo_full_name', 'last_synced_at',
+            ]);
 
         return Inertia::render('Projects/Index', [
             'projects' => $projects->map(fn (Project $project) => [
                 'id' => $project->id,
                 'name' => $project->name,
                 'api_token_prefix' => $project->api_token_prefix,
+                'github_repo_id' => $project->github_repo_id,
+                'github_repo_full_name' => $project->github_repo_full_name,
                 'last_synced_at' => $project->last_synced_at,
                 'enabledIds' => $project->rules->pluck('check_id'),
             ]),
@@ -44,7 +49,9 @@ class ProjectController extends Controller
         abort_unless($project->user_id === $request->user()->id, 404);
 
         return Inertia::render('Projects/Show', [
-            'project' => $project->only(['id', 'name', 'api_token_prefix']),
+            'project' => $project->only([
+                'id', 'name', 'api_token_prefix', 'github_repo_id', 'github_repo_full_name',
+            ]),
             'catalog' => collect(ChecksCatalog::all())
                 ->map(fn (array $check, string $id) => [
                     'id' => $id,

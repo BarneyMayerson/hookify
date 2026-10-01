@@ -19,7 +19,9 @@ export interface Check {
 }
 
 /**
- * GitHooks Hub Project model.
+ * Hookify Project — the shape ProjectController::show() sends via
+ * `$project->only([...])`. Used wherever only the core identity of a
+ * project is needed (e.g. GithubRepoPicker).
  */
 export interface Project {
   id: number;
@@ -27,10 +29,18 @@ export interface Project {
   api_token_prefix: string;
   github_repo_id: number | null;
   github_repo_full_name: string | null;
+}
+
+/**
+ * List-item shape for the Projects index page — everything in Project,
+ * plus sync status and enabled check ids, matching what
+ * ProjectController::index() sends per project. Enabled checks only ever
+ * arrive this way (never nested inside Project itself), since Show.vue
+ * receives them as its own separate top-level `enabledIds` prop instead.
+ */
+export interface ProjectSummary extends Project {
   last_synced_at: string | null;
-  enabledIds?: string[];
-  created_at?: string;
-  updated_at?: string;
+  enabledIds: string[];
 }
 
 /**
