@@ -69,7 +69,8 @@ class ProjectController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
+            // No CR/LF/NUL
+            'name' => ['required', 'string', 'max:255', 'regex:/^[^\r\n\0]*$/'],
         ]);
 
         [, $token] = Project::createWithToken($request->user(), $validated['name']);
