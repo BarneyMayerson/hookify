@@ -17,6 +17,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('projects', [ProjectController::class, 'store'])->name('projects.store');
     Route::get('projects/{project}', [ProjectController::class, 'show'])->name('projects.show');
     Route::put('projects/{project}/rules', [ProjectRuleController::class, 'update'])->name('projects.rules.update');
+    Route::delete('projects/{project}', [ProjectController::class, 'destroy'])->name('projects.destroy');
     Route::patch('projects/{project}/repository', [ProjectRepositoryController::class, 'update'])->name('projects.repository.update');
 
     Route::get('github/repositories', [GitHubRepositoryController::class, 'index'])->name('github.repositories');

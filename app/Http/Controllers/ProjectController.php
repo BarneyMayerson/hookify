@@ -80,4 +80,17 @@ class ProjectController extends Controller
         // fetched from the server again anyway, since only its hash is stored.
         return Redirect::route('projects.index')->with('plaintext_token', $token);
     }
+
+    public function destroy(Request $request, Project $project): RedirectResponse
+    {
+        abort_unless($project->user_id === $request->user()->id, 404);
+
+        // project_rules cascades via the FK constraint — nothing else to
+        // clean up here. The token hash goes with it, so any CLI already
+        // caching a manifest for this project will start getting 401s on
+        // its next successful network sync (see fail-open follow-up).
+        $project->delete();
+
+        return Redirect::route('projects.index');
+    }
 }

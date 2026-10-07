@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { Link } from '@inertiajs/vue3';
-import { ShieldCheck, Clock, ArrowRight } from '@lucide/vue';
+import { ShieldCheck, Clock, Settings } from '@lucide/vue';
 import GithubRepoPicker from '@/components/Projects/GithubRepoPicker.vue';
 import { Button } from '@/components/ui/button';
 import { show } from '@/routes/projects';
@@ -43,14 +43,14 @@ const rulesCount = computed(() => props.project.enabledIds?.length ?? 0);
       </div>
     </div>
 
-    <!-- Bottom Bar: GitHub Repo Picker & Link to Project Details -->
+    <!-- Bottom Bar: GitHub Repo Picker & Link to Project Management -->
     <div class="mt-5 flex items-center justify-between border-t pt-4">
       <GithubRepoPicker :project="project" />
 
       <Button as-child variant="ghost" size="sm" class="gap-1 text-xs">
         <Link :href="show(project.id).url">
-          View Rules
-          <ArrowRight class="size-3.5" />
+          <Settings class="size-3.5" />
+          Settings
         </Link>
       </Button>
     </div>

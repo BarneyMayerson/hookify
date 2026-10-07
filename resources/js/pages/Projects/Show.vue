@@ -1,9 +1,20 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { Link, useForm } from '@inertiajs/vue3';
-import { ArrowLeft, Save, AlertTriangle } from '@lucide/vue';
+import { ArrowLeft, Save, AlertTriangle, Trash2 } from '@lucide/vue';
 import GithubRepoPicker from '@/components/Projects/GithubRepoPicker.vue';
-import { index } from '@/routes/projects';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { destroy, index } from '@/routes/projects';
 import { update } from '@/routes/projects/rules';
 import type { Project, Check } from '@/types';
 
@@ -36,6 +47,16 @@ const ecosystemMeta: Record<string, { label: string; description: string }> = {
 
 function submit() {
   form.put(update(props.project.id).url);
+}
+
+// --- Project deletion ---
+const isDeleteOpen = ref(false);
+const confirmationText = ref('');
+const isConfirmed = computed(() => confirmationText.value === props.project.name);
+const deleteForm = useForm({});
+
+function deleteProject() {
+  deleteForm.delete(destroy(props.project.id).url);
 }
 </script>
 
@@ -215,5 +236,57 @@ function submit() {
         </div>
       </div>
     </form>
+
+    <!-- Danger Zone -->
+    <div
+      class="rounded-xl border border-red-200 bg-red-50/50 p-5 dark:border-red-900/50 dark:bg-red-950/10"
+    >
+      <h2 class="text-sm font-semibold text-red-900 dark:text-red-300">Danger zone</h2>
+      <p class="mt-1 text-xs text-red-700 dark:text-red-400">
+        Deleting a project revokes its token immediately. Any machine that already ran
+        <code class="font-mono">hookify sync</code> for it will keep using its last cached
+        configuration until this is addressed on the CLI side — it won't be notified that the
+        project is gone.
+      </p>
+
+      <Dialog v-model:open="isDeleteOpen">
+        <DialogTrigger as-child>
+          <Button
+            variant="outline"
+            size="sm"
+            class="mt-3 gap-1.5 border-red-300 text-red-700 hover:bg-red-100 hover:text-red-800 dark:border-red-900/50 dark:text-red-400 dark:hover:bg-red-950/30"
+            @click="confirmationText = ''"
+          >
+            <Trash2 class="size-4" />
+            Delete project
+          </Button>
+        </DialogTrigger>
+
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete "{{ project.name }}"?</DialogTitle>
+            <DialogDescription>
+              This permanently deletes the project, its token, and all of its check configuration.
+              Type
+              <strong class="font-mono">{{ project.name }}</strong>
+              below to confirm.
+            </DialogDescription>
+          </DialogHeader>
+
+          <Input v-model="confirmationText" autocomplete="off" :placeholder="project.name" />
+
+          <DialogFooter class="gap-2">
+            <Button variant="secondary" @click="isDeleteOpen = false">Cancel</Button>
+            <Button
+              variant="destructive"
+              :disabled="!isConfirmed || deleteForm.processing"
+              @click="deleteProject"
+            >
+              {{ deleteForm.processing ? 'Deleting...' : 'Delete project' }}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
   </div>
 </template>
