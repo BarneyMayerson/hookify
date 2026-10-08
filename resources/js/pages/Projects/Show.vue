@@ -243,10 +243,10 @@ function deleteProject() {
     >
       <h2 class="text-sm font-semibold text-red-900 dark:text-red-300">Danger zone</h2>
       <p class="mt-1 text-xs text-red-700 dark:text-red-400">
-        Deleting a project revokes its token immediately. Any machine that already ran
-        <code class="font-mono">hookify sync</code> for it will keep using its last cached
-        configuration until this is addressed on the CLI side — it won't be notified that the
-        project is gone.
+        Deleting a project revokes its token immediately. The next time anyone runs
+        <code class="font-mono">hookify sync</code> for it, the CLI will report the invalid token
+        and remove the hooks it installed. Until then, hooks already installed on a machine keep
+        running locally — they don't contact Hookify on their own.
       </p>
 
       <Dialog v-model:open="isDeleteOpen">
