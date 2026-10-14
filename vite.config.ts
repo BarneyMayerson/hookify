@@ -5,7 +5,13 @@ import vue from '@vitejs/plugin-vue';
 import fs from 'fs';
 import laravel from 'laravel-vite-plugin';
 import { bunny } from 'laravel-vite-plugin/fonts';
+import path from 'path';
 import { defineConfig, lazyPlugins } from 'vite-plus';
+
+const keyPath = path.resolve(__dirname, './.docker/certs/hookify.lan+2-key.pem');
+const certPath = path.resolve(__dirname, './.docker/certs/hookify.lan+2.pem');
+
+const hasCertificates = fs.existsSync(keyPath) && fs.existsSync(certPath);
 
 export default defineConfig({
   plugins: lazyPlugins(() => [
@@ -33,13 +39,17 @@ export default defineConfig({
     }),
   ]),
   server: {
-    https: {
-      key: fs.readFileSync('./.docker/certs/hookify.lan+2-key.pem'),
-      cert: fs.readFileSync('./.docker/certs/hookify.lan+2.pem'),
-    },
-    hmr: {
-      host: 'hookify.lan',
-    },
+    ...(hasCertificates
+      ? {
+          https: {
+            key: fs.readFileSync(keyPath),
+            cert: fs.readFileSync(certPath),
+          },
+          hmr: {
+            host: 'hookify.lan',
+          },
+        }
+      : {}),
     watch: {
       ignored: ['**/.agents/**', '**/.claude/**', '**/.cursor/**', '**/.junie/**', '**/vendor/**'],
     },
