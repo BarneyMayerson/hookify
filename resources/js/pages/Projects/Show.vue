@@ -2,7 +2,7 @@
 import { computed, ref } from 'vue';
 import { Link, useForm } from '@inertiajs/vue3';
 import { ArrowLeft, Save, AlertTriangle, Trash2 } from '@lucide/vue';
-import GithubRepoPicker from '@/components/Projects/GithubRepoPicker.vue';
+import GitHubRepoPicker from '@/components/Projects/GitHubRepoPicker.vue';
 import {
   Dialog,
   DialogContent,
@@ -28,7 +28,6 @@ const form = useForm({
   check_ids: [...props.enabledIds],
 });
 
-// Group catalog checks by ecosystem
 const groups = computed(() => {
   const byEcosystem: Record<string, Check[]> = { php: [], js: [], universal: [] };
   for (const check of props.catalog) {
@@ -49,7 +48,6 @@ function submit() {
   form.put(update(props.project.id).url);
 }
 
-// --- Project deletion ---
 const isDeleteOpen = ref(false);
 const confirmationText = ref('');
 const isConfirmed = computed(() => confirmationText.value === props.project.name);
@@ -62,72 +60,68 @@ function deleteProject() {
 
 <template>
   <div class="mx-auto max-w-7xl space-y-8 p-6">
-    <!-- Header Navigation & Actions -->
+    <!-- Header -->
     <div
-      class="flex flex-col gap-4 border-b border-slate-200 pb-6 sm:flex-row sm:items-center sm:justify-between dark:border-slate-800"
+      class="border-border flex flex-col gap-4 border-b pb-6 sm:flex-row sm:items-center sm:justify-between"
     >
       <div class="space-y-1">
         <Link
           :href="index().url"
-          class="inline-flex items-center gap-1 text-xs font-medium text-slate-500 transition-colors hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
+          class="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-xs font-medium transition-colors"
         >
           <ArrowLeft class="h-3.5 w-3.5" />
           Back to Projects
         </Link>
         <div class="flex flex-wrap items-center gap-3 pt-3">
-          <h1 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+          <h1 class="text-foreground text-2xl font-bold tracking-tight">
             {{ project.name }}
           </h1>
           <span
-            class="rounded-md border border-slate-200 bg-slate-100 px-2 py-1 font-mono text-xs text-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400"
+            class="border-border bg-muted text-muted-foreground rounded-md border px-2 py-1 font-mono text-xs"
           >
             Token prefix: {{ project.api_token_prefix }}…
           </span>
         </div>
       </div>
 
-      <!-- Action Buttons -->
       <div class="flex items-center gap-3">
-        <!-- GitHub Repo Picker -->
-        <GithubRepoPicker :project="project" />
+        <GitHubRepoPicker :project />
 
-        <button
+        <Button
           type="button"
           @click="submit"
           :disabled="form.processing || !form.isDirty"
-          class="inline-flex w-30 items-center justify-center gap-2 rounded-lg bg-indigo-600 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
+          class="gap-2"
         >
           <Save class="h-4 w-4" />
           <span>{{ form.processing ? 'Saving...' : 'Save Rules' }}</span>
-        </button>
+        </Button>
       </div>
     </div>
 
-    <!-- Rules Selection Grid -->
+    <!-- Rules Selection -->
     <form @submit.prevent="submit" class="space-y-8">
       <div class="grid gap-6 lg:grid-cols-3">
         <div
           v-for="(checks, ecosystem) in groups"
           :key="ecosystem"
           v-show="checks.length"
-          class="flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
+          class="bg-card border-border flex flex-col overflow-hidden rounded-xl border shadow-sm"
         >
           <!-- Group Header -->
-          <div
-            class="border-b border-slate-200 bg-slate-50/70 p-4 dark:border-slate-800 dark:bg-slate-800/40"
-          >
+          <div class="border-border bg-muted/50 border-b p-4">
             <div class="flex items-center justify-between">
-              <h2 class="font-semibold text-slate-900 dark:text-slate-100">
+              <h2 class="text-foreground font-semibold">
                 {{ ecosystemMeta[ecosystem]?.label ?? ecosystem }}
               </h2>
               <span
-                class="rounded-full bg-slate-200/70 px-2 py-0.5 text-xs font-medium text-slate-700 dark:bg-slate-700/60 dark:text-slate-300"
+                class="bg-muted text-muted-foreground rounded-full px-2 py-0.5 text-xs font-medium"
               >
                 {{ checks.filter((c) => form.check_ids.includes(c.id)).length }} /
                 {{ checks.length }}
               </span>
             </div>
-            <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+            <p class="text-muted-foreground mt-0.5 text-xs">
               {{ ecosystemMeta[ecosystem]?.description }}
             </p>
           </div>
@@ -140,8 +134,8 @@ function deleteProject() {
               :class="[
                 'group relative flex cursor-pointer flex-col gap-2 rounded-lg border p-3.5 transition-all select-none',
                 form.check_ids.includes(check.id)
-                  ? 'border-indigo-500/80 bg-indigo-50/30 ring-1 ring-indigo-500/20 dark:border-indigo-500/50 dark:bg-indigo-950/20'
-                  : 'border-slate-200 bg-white hover:border-slate-300 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-slate-700',
+                  ? 'border-primary/60 bg-primary/5 ring-primary/20 ring-1'
+                  : 'border-border bg-card hover:border-muted-foreground/30',
               ]"
             >
               <div class="flex items-start gap-3">
@@ -149,13 +143,13 @@ function deleteProject() {
                   v-model="form.check_ids"
                   type="checkbox"
                   :value="check.id"
-                  class="mt-0.5 h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 focus:ring-offset-0 dark:border-slate-700 dark:bg-slate-800 dark:checked:bg-indigo-600"
+                  class="border-border text-primary focus:ring-primary mt-0.5 h-4 w-4 rounded"
                 />
 
                 <div class="min-w-0 flex-1">
                   <div class="flex items-center justify-between gap-2">
                     <span
-                      class="text-sm font-medium text-slate-900 transition-colors group-hover:text-indigo-600 dark:text-slate-100 dark:group-hover:text-indigo-400"
+                      class="text-foreground group-hover:text-primary text-sm font-medium transition-colors"
                     >
                       {{ check.label }}
                     </span>
@@ -164,13 +158,13 @@ function deleteProject() {
                   <div class="mt-1 flex flex-wrap gap-1.5">
                     <span
                       v-if="check.tier === 'secondary'"
-                      class="inline-flex items-center rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-500 dark:bg-slate-800 dark:text-slate-400"
+                      class="bg-muted text-muted-foreground inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-medium"
                     >
                       community
                     </span>
                     <span
                       v-if="check.requiresConfig || check.requiresBinary"
-                      class="inline-flex items-center gap-1 rounded border border-amber-200 bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium text-amber-800 dark:border-amber-900/50 dark:bg-amber-950/60 dark:text-amber-300"
+                      class="inline-flex items-center gap-1 rounded border border-amber-500/30 bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-medium text-amber-700 dark:text-amber-300"
                     >
                       <AlertTriangle class="h-2.5 w-2.5 shrink-0" />
                       {{ check.requiresBinary ? 'Needs extra setup' : 'Needs config file' }}
@@ -179,13 +173,12 @@ function deleteProject() {
                 </div>
               </div>
 
-              <!-- Warning Notice when checked -->
               <div
                 v-if="
                   (check.requiresConfig || check.requiresBinary) &&
                   form.check_ids.includes(check.id)
                 "
-                class="mt-1 flex items-start gap-1.5 rounded-md border border-amber-200/60 bg-amber-50/80 p-2 text-xs text-amber-800 dark:border-amber-900/40 dark:bg-amber-950/40 dark:text-amber-300"
+                class="mt-1 flex items-start gap-1.5 rounded-md border border-amber-500/20 bg-amber-500/10 p-2 text-xs text-amber-700 dark:text-amber-300"
               >
                 <AlertTriangle
                   class="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-600 dark:text-amber-400"
@@ -203,12 +196,12 @@ function deleteProject() {
         </div>
       </div>
 
-      <!-- Sticky Save Bar for convenience when scrolling -->
+      <!-- Sticky Save Bar -->
       <div
         v-if="form.isDirty"
-        class="sticky bottom-6 flex items-center justify-between rounded-xl border border-slate-200 bg-white/90 p-4 shadow-lg backdrop-blur-md transition-all dark:border-slate-800 dark:bg-slate-900/90"
+        class="border-border bg-background/90 sticky bottom-6 flex items-center justify-between rounded-xl border p-4 shadow-lg backdrop-blur-md"
       >
-        <div class="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
+        <div class="text-foreground flex items-center gap-2 text-sm">
           <span class="relative flex h-2 w-2">
             <span
               class="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-75"
@@ -218,31 +211,19 @@ function deleteProject() {
           You have unsaved rule changes.
         </div>
         <div class="flex items-center gap-3">
-          <button
-            type="button"
-            @click="form.reset()"
-            class="px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
-          >
-            Reset
-          </button>
-          <button
-            type="submit"
-            :disabled="form.processing"
-            class="inline-flex w-30 items-center justify-center gap-2 rounded-lg bg-indigo-600 py-2 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-indigo-500 disabled:opacity-50"
-          >
+          <Button variant="ghost" size="sm" type="button" @click="form.reset()"> Reset </Button>
+          <Button type="submit" size="sm" :disabled="form.processing" class="gap-2">
             <Save class="h-3.5 w-3.5" />
             <span>{{ form.processing ? 'Saving...' : 'Save Rules' }}</span>
-          </button>
+          </Button>
         </div>
       </div>
     </form>
 
     <!-- Danger Zone -->
-    <div
-      class="rounded-xl border border-red-200 bg-red-50/50 p-5 dark:border-red-900/50 dark:bg-red-950/10"
-    >
-      <h2 class="text-sm font-semibold text-red-900 dark:text-red-300">Danger zone</h2>
-      <p class="mt-1 text-xs text-red-700 dark:text-red-400">
+    <div class="rounded-xl border border-red-500/30 bg-red-500/10 p-5">
+      <h2 class="text-sm font-semibold text-red-700 dark:text-red-300">Danger zone</h2>
+      <p class="mt-1 text-xs text-red-600 dark:text-red-400">
         Deleting a project revokes its token immediately. The next time anyone runs
         <code class="font-mono">hookify sync</code> for it, the CLI will report the invalid token
         and remove the hooks it installed. Until then, hooks already installed on a machine keep
@@ -254,7 +235,7 @@ function deleteProject() {
           <Button
             variant="outline"
             size="sm"
-            class="mt-3 gap-1.5 border-red-300 text-red-700 hover:bg-red-100 hover:text-red-800 dark:border-red-900/50 dark:text-red-400 dark:hover:bg-red-950/30"
+            class="mt-3 gap-1.5 border-red-500/40 text-red-700 hover:bg-red-500/10 hover:text-red-800 dark:text-red-400"
             @click="confirmationText = ''"
           >
             <Trash2 class="size-4" />

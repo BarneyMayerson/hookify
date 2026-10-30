@@ -39,8 +39,8 @@ function copyCommand() {
   <div class="space-y-6 p-6">
     <div class="flex items-center justify-between">
       <div>
-        <h1 class="text-2xl font-bold tracking-tight">Projects</h1>
-        <p class="text-sm text-slate-500">
+        <h1 class="text-foreground text-2xl font-bold tracking-tight">Projects</h1>
+        <p class="text-muted-foreground text-sm">
           Manage Git hook configurations and repository bindings for your projects.
         </p>
       </div>
@@ -49,14 +49,14 @@ function copyCommand() {
     <!-- Token Banner After Project Creation -->
     <div
       v-if="plaintextToken"
-      class="rounded-xl border border-emerald-200 bg-emerald-50/50 p-4 dark:border-emerald-900/50 dark:bg-emerald-950/20"
+      class="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4"
     >
       <div class="flex items-start justify-between gap-4">
         <div class="space-y-1">
-          <p class="text-sm font-semibold text-emerald-900 dark:text-emerald-300">
+          <p class="text-sm font-semibold text-emerald-700 dark:text-emerald-300">
             Project Created Successfully!
           </p>
-          <p class="text-xs text-emerald-700 dark:text-emerald-400">
+          <p class="text-xs text-emerald-600 dark:text-emerald-400">
             Copy this command to initialize and sync Git hooks locally in your repository:
           </p>
         </div>
@@ -67,10 +67,10 @@ function copyCommand() {
         </Button>
       </div>
       <div
-        class="mt-3 flex items-center gap-2 overflow-x-auto rounded-lg bg-slate-950 p-3 font-mono text-xs text-emerald-400"
+        class="bg-muted mt-3 flex items-center gap-2 overflow-x-auto rounded-lg p-3 font-mono text-xs"
       >
-        <Terminal class="size-4 shrink-0 text-slate-500" />
-        <code>{{ installCommand }}</code>
+        <Terminal class="text-muted-foreground size-4 shrink-0" />
+        <code class="text-foreground">{{ installCommand }}</code>
       </div>
     </div>
 

@@ -12,6 +12,7 @@ import {
 } from '@lucide/vue';
 import { dashboard } from '@/routes';
 import { index } from '@/routes/projects';
+import { Button } from '@/components/ui/button';
 
 defineOptions({
   layout: {
@@ -32,7 +33,6 @@ interface ProjectSummary {
   last_synced_at: string | null;
 }
 
-// Props with fallbacks in case the data isn't wired up from the backend yet
 const props = withDefaults(
   defineProps<{
     stats?: {
@@ -60,66 +60,51 @@ const props = withDefaults(
     <!-- Welcome Header -->
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <div>
-        <h1 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
-          Overview
-        </h1>
-        <p class="text-sm text-slate-500 dark:text-slate-400">
+        <h1 class="text-foreground text-2xl font-bold tracking-tight">Overview</h1>
+        <p class="text-muted-foreground text-sm">
           Monitor your Git hooks configuration and project sync states.
         </p>
       </div>
 
-      <Link
-        :href="index().url"
-        class="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-500"
-      >
-        <Plus class="h-4 w-4" />
-        <span>Manage Projects</span>
-      </Link>
+      <Button as-child>
+        <Link :href="index().url">
+          <Plus class="h-4 w-4" />
+          <span>Manage Projects</span>
+        </Link>
+      </Button>
     </div>
 
     <!-- Stat Cards -->
     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       <!-- Stat 1: Total Projects -->
-      <div
-        class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900"
-      >
+      <div class="bg-card border-border rounded-xl border p-5 shadow-sm">
         <div class="flex items-center justify-between">
-          <span
-            class="text-xs font-medium tracking-wider text-slate-500 uppercase dark:text-slate-400"
-          >
+          <span class="text-muted-foreground text-xs font-medium tracking-wider uppercase">
             Total Projects
           </span>
-          <div
-            class="rounded-lg bg-indigo-50 p-2 text-indigo-600 dark:bg-indigo-950/60 dark:text-indigo-400"
-          >
+          <div class="bg-primary/10 text-primary rounded-lg p-2">
             <FolderGit2 class="h-5 w-5" />
           </div>
         </div>
         <div class="mt-2 flex items-baseline gap-2">
-          <span class="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+          <span class="text-foreground text-3xl font-bold tracking-tight">
             {{ props.stats.totalProjects }}
           </span>
         </div>
       </div>
 
       <!-- Stat 2: Active Rules -->
-      <div
-        class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900"
-      >
+      <div class="bg-card border-border rounded-xl border p-5 shadow-sm">
         <div class="flex items-center justify-between">
-          <span
-            class="text-xs font-medium tracking-wider text-slate-500 uppercase dark:text-slate-400"
-          >
+          <span class="text-muted-foreground text-xs font-medium tracking-wider uppercase">
             Active Hooks & Rules
           </span>
-          <div
-            class="rounded-lg bg-emerald-50 p-2 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400"
-          >
+          <div class="rounded-lg bg-emerald-500/10 p-2 text-emerald-600 dark:text-emerald-400">
             <ShieldCheck class="h-5 w-5" />
           </div>
         </div>
         <div class="mt-2 flex items-baseline gap-2">
-          <span class="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+          <span class="text-foreground text-3xl font-bold tracking-tight">
             {{ props.stats.activeRulesCount }}
           </span>
         </div>
@@ -127,20 +112,18 @@ const props = withDefaults(
 
       <!-- Stat 3: Last Sync -->
       <div
-        class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:col-span-2 lg:col-span-1 dark:border-slate-800 dark:bg-slate-900"
+        class="bg-card border-border rounded-xl border p-5 shadow-sm sm:col-span-2 lg:col-span-1"
       >
         <div class="flex items-center justify-between">
-          <span
-            class="text-xs font-medium tracking-wider text-slate-500 uppercase dark:text-slate-400"
-          >
+          <span class="text-muted-foreground text-xs font-medium tracking-wider uppercase">
             CLI Sync Activity
           </span>
-          <div class="rounded-lg bg-sky-50 p-2 text-sky-600 dark:bg-sky-950/60 dark:text-sky-400">
+          <div class="rounded-lg bg-sky-500/10 p-2 text-sky-600 dark:text-sky-400">
             <Activity class="h-5 w-5" />
           </div>
         </div>
         <div class="mt-2 flex items-baseline gap-2">
-          <span class="text-sm font-semibold text-slate-700 dark:text-slate-300">
+          <span class="text-foreground text-sm font-semibold">
             {{ props.stats.lastSyncTime || 'No recent syncs' }}
           </span>
         </div>
@@ -149,67 +132,51 @@ const props = withDefaults(
 
     <!-- Main Content Area Grid -->
     <div class="grid gap-6 lg:grid-cols-3">
-      <!-- Quick Setup Guide (2 columns on large screens) -->
-      <div
-        class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm lg:col-span-2 dark:border-slate-800 dark:bg-slate-900"
-      >
-        <div class="flex items-center gap-2 font-semibold text-slate-900 dark:text-slate-100">
-          <Terminal class="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+      <!-- Quick Setup Guide -->
+      <div class="bg-card border-border rounded-xl border p-6 shadow-sm lg:col-span-2">
+        <div class="text-foreground flex items-center gap-2 font-semibold">
+          <Terminal class="text-primary h-5 w-5" />
           <h2>How Hookify Works</h2>
         </div>
-        <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+        <p class="text-muted-foreground mt-1 text-sm">
           Keep your local Git hooks synchronized across your entire team in three steps:
         </p>
 
         <div class="mt-6 grid gap-4 sm:grid-cols-3">
-          <div
-            class="rounded-lg border border-slate-100 bg-slate-50/50 p-4 dark:border-slate-800 dark:bg-slate-800/30"
-          >
+          <div class="bg-muted/50 border-border rounded-lg border p-4">
             <div
-              class="flex h-7 w-7 items-center justify-center rounded-full bg-indigo-100 text-xs font-bold text-indigo-600 dark:bg-indigo-900/60 dark:text-indigo-400"
+              class="bg-primary/10 text-primary flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold"
             >
               1
             </div>
-            <h3 class="mt-3 text-xs font-semibold text-slate-900 dark:text-slate-100">
-              Create Project
-            </h3>
-            <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+            <h3 class="text-foreground mt-3 text-xs font-semibold">Create Project</h3>
+            <p class="text-muted-foreground mt-1 text-xs">
               Register a project to generate a secure API token.
             </p>
           </div>
 
-          <div
-            class="rounded-lg border border-slate-100 bg-slate-50/50 p-4 dark:border-slate-800 dark:bg-slate-800/30"
-          >
+          <div class="bg-muted/50 border-border rounded-lg border p-4">
             <div
-              class="flex h-7 w-7 items-center justify-center rounded-full bg-indigo-100 text-xs font-bold text-indigo-600 dark:bg-indigo-900/60 dark:text-indigo-400"
+              class="bg-primary/10 text-primary flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold"
             >
               2
             </div>
-            <h3 class="mt-3 text-xs font-semibold text-slate-900 dark:text-slate-100">
-              Configure Rules
-            </h3>
-            <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+            <h3 class="text-foreground mt-3 text-xs font-semibold">Configure Rules</h3>
+            <p class="text-muted-foreground mt-1 text-xs">
               Enable PHP, JS/TS, or Universal linters and static checks.
             </p>
           </div>
 
-          <div
-            class="rounded-lg border border-slate-100 bg-slate-50/50 p-4 dark:border-slate-800 dark:bg-slate-800/30"
-          >
+          <div class="bg-muted/50 border-border rounded-lg border p-4">
             <div
-              class="flex h-7 w-7 items-center justify-center rounded-full bg-indigo-100 text-xs font-bold text-indigo-600 dark:bg-indigo-900/60 dark:text-indigo-400"
+              class="bg-primary/10 text-primary flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold"
             >
               3
             </div>
-            <h3 class="mt-3 text-xs font-semibold text-slate-900 dark:text-slate-100">
-              Run CLI Sync
-            </h3>
-            <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+            <h3 class="text-foreground mt-3 text-xs font-semibold">Run CLI Sync</h3>
+            <p class="text-muted-foreground mt-1 text-xs">
               Run
-              <code class="font-mono text-[11px] text-slate-700 dark:text-slate-300"
-                >npx hookify-cli sync</code
-              >
+              <code class="text-foreground font-mono text-[11px]">npx hookify-cli sync</code>
               in your repository.
             </p>
           </div>
@@ -218,7 +185,7 @@ const props = withDefaults(
         <div class="mt-6 flex justify-end">
           <Link
             :href="index().url"
-            class="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600 transition-colors hover:text-indigo-500 dark:text-indigo-400"
+            class="text-primary hover:text-primary/80 inline-flex items-center gap-1.5 text-xs font-semibold transition-colors"
           >
             <span>Go to Projects list</span>
             <ArrowRight class="h-3.5 w-3.5" />
@@ -226,20 +193,16 @@ const props = withDefaults(
         </div>
       </div>
 
-      <!-- Recent Projects Widget (1 column) -->
+      <!-- Recent Projects Widget -->
       <div
-        class="flex flex-col justify-between rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900"
+        class="bg-card border-border flex flex-col justify-between rounded-xl border p-6 shadow-sm"
       >
         <div>
-          <div
-            class="flex items-center justify-between border-b border-slate-100 pb-3 dark:border-slate-800"
-          >
-            <h2 class="text-sm font-semibold text-slate-900 dark:text-slate-100">
-              Recent Projects
-            </h2>
+          <div class="border-border flex items-center justify-between border-b pb-3">
+            <h2 class="text-foreground text-sm font-semibold">Recent Projects</h2>
             <Link
               :href="index().url"
-              class="text-xs font-medium text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+              class="text-muted-foreground hover:text-foreground text-xs font-medium"
             >
               View all
             </Link>
@@ -249,25 +212,25 @@ const props = withDefaults(
             <div
               v-for="proj in props.recentProjects"
               :key="proj.id"
-              class="flex items-center justify-between rounded-lg border border-slate-100 p-3 transition-colors hover:bg-slate-50/50 dark:border-slate-800/80 dark:hover:bg-slate-800/30"
+              class="border-border hover:bg-accent/50 flex items-center justify-between rounded-lg border p-3 transition-colors"
             >
               <div>
-                <p class="text-sm font-medium text-slate-900 dark:text-slate-100">
+                <p class="text-foreground text-sm font-medium">
                   {{ proj.name }}
                 </p>
                 <div class="mt-0.5 flex items-center gap-2">
-                  <span class="font-mono text-[10px] text-slate-400">
+                  <span class="text-muted-foreground font-mono text-[10px]">
                     {{ proj.api_token_prefix }}…
                   </span>
-                  <span class="text-[10px] text-slate-400">•</span>
-                  <span class="text-[10px] text-slate-500 dark:text-slate-400">
+                  <span class="text-muted-foreground text-[10px]">•</span>
+                  <span class="text-muted-foreground text-[10px]">
                     {{ proj.active_rules_count }} rules
                   </span>
                 </div>
               </div>
 
               <div class="text-right">
-                <span class="inline-flex items-center gap-1 text-[11px] text-slate-400">
+                <span class="text-muted-foreground inline-flex items-center gap-1 text-[11px]">
                   <Clock class="h-3 w-3" />
                   {{ proj.last_synced_at || 'Never' }}
                 </span>
@@ -277,10 +240,10 @@ const props = withDefaults(
 
           <!-- Empty State -->
           <div v-else class="py-8 text-center">
-            <p class="text-xs text-slate-500 dark:text-slate-400">No projects configured yet.</p>
+            <p class="text-muted-foreground text-xs">No projects configured yet.</p>
             <Link
               :href="index().url"
-              class="mt-2 inline-flex items-center gap-1 text-xs font-medium text-indigo-600 hover:underline dark:text-indigo-400"
+              class="text-primary mt-2 inline-flex items-center gap-1 text-xs font-medium hover:underline"
             >
               <Plus class="h-3.5 w-3.5" />
               <span>Create project</span>
@@ -288,8 +251,8 @@ const props = withDefaults(
           </div>
         </div>
 
-        <div class="mt-4 border-t border-slate-100 pt-4 text-center dark:border-slate-800">
-          <span class="inline-flex items-center gap-1.5 text-xs text-slate-400">
+        <div class="border-border mt-4 border-t pt-4 text-center">
+          <span class="text-muted-foreground inline-flex items-center gap-1.5 text-xs">
             <CheckCircle2 class="h-3.5 w-3.5 text-emerald-500" />
             Hookify API status: Operational
           </span>

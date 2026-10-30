@@ -86,18 +86,18 @@ function linkRepository(selectedRepo: GitHubRepository | null) {
   <Dialog :open="isOpen" @update:open="handleOpenChange">
     <DialogTrigger as-child>
       <Button variant="outline" size="sm" class="gap-2">
-        <GitBranch class="size-4 text-slate-500" />
+        <GitBranch class="text-muted-foreground size-4" />
         <span v-if="project.github_repo_full_name" class="font-mono text-xs">
           {{ project.github_repo_full_name }}
         </span>
-        <span v-else class="text-slate-500">Link GitHub</span>
+        <span v-else class="text-muted-foreground">Link GitHub</span>
       </Button>
     </DialogTrigger>
 
     <DialogContent class="sm:max-w-120">
       <DialogHeader>
         <DialogTitle class="flex items-center gap-2">
-          <GitBranch class="size-5 text-indigo-600 dark:text-indigo-400" />
+          <GitBranch class="text-primary size-5" />
           Link GitHub Repository
         </DialogTitle>
         <DialogDescription>
@@ -107,15 +107,18 @@ function linkRepository(selectedRepo: GitHubRepository | null) {
       </DialogHeader>
 
       <!-- Loading State -->
-      <div v-if="isLoading" class="flex flex-col items-center justify-center py-8 text-slate-500">
-        <Loader2 class="mb-2 size-8 animate-spin text-indigo-600" />
+      <div
+        v-if="isLoading"
+        class="text-muted-foreground flex flex-col items-center justify-center py-8"
+      >
+        <Loader2 class="text-primary mb-2 size-8 animate-spin" />
         <p class="text-sm">Fetching repositories from GitHub...</p>
       </div>
 
       <!-- Error State -->
       <div
         v-else-if="errorMessage"
-        class="rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-900/50 dark:bg-amber-950/20"
+        class="rounded-lg border border-amber-500/30 bg-amber-500/10 p-4"
       >
         <div class="flex items-start gap-3">
           <AlertCircle class="mt-0.5 size-5 shrink-0 text-amber-600 dark:text-amber-400" />
@@ -133,10 +136,10 @@ function linkRepository(selectedRepo: GitHubRepository | null) {
         <!-- Currently Linked Repository Banner -->
         <div
           v-if="project.github_repo_full_name"
-          class="flex items-center justify-between rounded-md border bg-slate-50 p-3 dark:bg-slate-900"
+          class="border-border bg-muted/50 flex items-center justify-between rounded-md border p-3"
         >
           <div class="flex min-w-0 items-center gap-2">
-            <GitBranch class="size-4 shrink-0 text-indigo-600" />
+            <GitBranch class="text-primary size-4 shrink-0" />
             <span class="truncate font-mono text-xs font-semibold">
               {{ project.github_repo_full_name }}
             </span>
@@ -144,7 +147,7 @@ function linkRepository(selectedRepo: GitHubRepository | null) {
           <Button
             variant="ghost"
             size="sm"
-            class="h-8 gap-1.5 text-xs text-red-600 hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-950/30"
+            class="h-8 gap-1.5 text-xs text-red-600 hover:bg-red-500/10 hover:text-red-700"
             :disabled="isSaving"
             @click="linkRepository(null)"
           >
@@ -154,15 +157,15 @@ function linkRepository(selectedRepo: GitHubRepository | null) {
         </div>
 
         <div
-          class="max-h-65 space-y-1 divide-y divide-slate-100 overflow-y-auto rounded-md border dark:divide-slate-800"
+          class="border-border divide-border max-h-65 space-y-1 divide-y overflow-y-auto rounded-md border"
         >
           <button
             v-for="repo in repoList"
             :key="repo.id"
             type="button"
-            class="flex w-full items-center justify-between p-2.5 text-left text-sm transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50"
+            class="hover:bg-accent/50 flex w-full items-center justify-between p-2.5 text-left text-sm transition-colors"
             :class="{
-              'bg-indigo-50/50 dark:bg-indigo-950/20': project.github_repo_id === repo.id,
+              'bg-primary/5': project.github_repo_id === repo.id,
             }"
             :disabled="isSaving"
             @click="linkRepository(repo)"
@@ -171,15 +174,12 @@ function linkRepository(selectedRepo: GitHubRepository | null) {
               <span class="truncate font-mono text-xs">{{ repo.full_name }}</span>
               <span
                 v-if="repo.private"
-                class="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] text-slate-600 dark:bg-slate-800 dark:text-slate-400"
+                class="bg-muted text-muted-foreground rounded px-1.5 py-0.5 text-[10px]"
               >
                 private
               </span>
             </div>
-            <Check
-              v-if="project.github_repo_id === repo.id"
-              class="size-4 shrink-0 text-indigo-600"
-            />
+            <Check v-if="project.github_repo_id === repo.id" class="text-primary size-4 shrink-0" />
           </button>
         </div>
       </div>

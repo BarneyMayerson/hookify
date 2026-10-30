@@ -18,10 +18,10 @@ function submit() {
 
 <template>
   <form
-    class="bg-card flex items-center gap-3 rounded-xl border p-4 shadow-sm"
+    class="bg-card border-border flex items-center gap-3 rounded-xl border p-4 shadow-sm"
     @submit.prevent="submit"
   >
-    <FolderPlus class="size-5 shrink-0 text-indigo-600" />
+    <FolderPlus class="text-primary size-5 shrink-0" />
     <Input
       v-model="form.name"
       type="text"
