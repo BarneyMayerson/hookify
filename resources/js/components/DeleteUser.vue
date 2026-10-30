@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { Form } from '@inertiajs/vue3';
+import { AlertTriangle } from '@lucide/vue';
 import { computed, ref } from 'vue';
+
 import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
 import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
@@ -16,7 +18,6 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { AlertTriangle } from '@lucide/vue';
 
 const confirmationText = ref('');
 const isConfirmed = computed(() => confirmationText.value === 'DELETE');

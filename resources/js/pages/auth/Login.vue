@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { Head } from '@inertiajs/vue3';
+
+import GitHubIcon from '@/components/GitHubIcon.vue';
 import { Button } from '@/components/ui/button';
 import { redirect } from '@/routes/auth/github';
-import GitHubIcon from '@/components/GitHubIcon.vue';
 
 defineOptions({
   layout: {

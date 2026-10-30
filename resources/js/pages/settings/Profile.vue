@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { Head, usePage } from '@inertiajs/vue3';
-import { computed } from 'vue';
 import { GitBranch, Mail, User as UserIcon, ExternalLink } from '@lucide/vue';
+import { computed } from 'vue';
+
 import DeleteUser from '@/components/DeleteUser.vue';
 import Heading from '@/components/Heading.vue';
 import type { Auth } from '@/types';

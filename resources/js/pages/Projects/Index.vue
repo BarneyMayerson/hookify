@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
 import { usePage } from '@inertiajs/vue3';
 import { Check, Copy, Terminal } from '@lucide/vue';
-import { Button } from '@/components/ui/button';
-import type { ProjectSummary, CatalogEntry } from '@/types';
+import { ref, computed } from 'vue';
+
 import CreateProjectForm from '@/components/Projects/CreateProjectForm.vue';
 import ProjectCard from '@/components/Projects/ProjectCard.vue';
+import { Button } from '@/components/ui/button';
+import type { ProjectSummary, CatalogEntry } from '@/types';
 
 const props = defineProps<{
   projects: ProjectSummary[];

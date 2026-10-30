@@ -1,11 +1,12 @@
+import fs from 'fs';
+import path from 'path';
+
 import inertia from '@inertiajs/vite';
 import { wayfinder } from '@laravel/vite-plugin-wayfinder';
 import tailwindcss from '@tailwindcss/vite';
 import vue from '@vitejs/plugin-vue';
-import fs from 'fs';
 import laravel from 'laravel-vite-plugin';
 import { bunny } from 'laravel-vite-plugin/fonts';
-import path from 'path';
 import { defineConfig, lazyPlugins } from 'vite-plus';
 
 const keyPath = path.resolve(__dirname, './.docker/certs/hookify.lan+2-key.pem');
@@ -88,16 +89,6 @@ export default defineConfig({
       functions: ['clsx', 'cn', 'cva'],
       entryPoint: 'resources/css/app.css',
     },
-    sortImports: {
-      groups: [
-        'type-import',
-        ['value-builtin', 'value-external'],
-        'type-internal',
-        'value-internal',
-        ['type-parent', 'type-sibling', 'type-index'],
-        ['value-parent', 'value-sibling', 'value-index'],
-        'unknown',
-      ],
-    },
+    sortImports: true,
   },
 });

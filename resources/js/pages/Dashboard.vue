@@ -10,9 +10,10 @@ import {
   Clock,
   CheckCircle2,
 } from '@lucide/vue';
+
+import { Button } from '@/components/ui/button';
 import { dashboard } from '@/routes';
 import { index } from '@/routes/projects';
-import { Button } from '@/components/ui/button';
 
 defineOptions({
   layout: {

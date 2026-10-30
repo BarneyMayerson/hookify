@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
 import { Link, useForm } from '@inertiajs/vue3';
 import { ArrowLeft, Save, AlertTriangle, Trash2 } from '@lucide/vue';
+import { computed, ref } from 'vue';
+
 import GitHubRepoPicker from '@/components/Projects/GitHubRepoPicker.vue';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -12,7 +14,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { destroy, index } from '@/routes/projects';
 import { update } from '@/routes/projects/rules';

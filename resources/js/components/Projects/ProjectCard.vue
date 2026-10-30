@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { computed } from 'vue';
 import { Link } from '@inertiajs/vue3';
 import { ShieldCheck, Clock, Settings } from '@lucide/vue';
+import { computed } from 'vue';
+
 import GitHubRepoPicker from '@/components/Projects/GitHubRepoPicker.vue';
 import { Button } from '@/components/ui/button';
 import { show } from '@/routes/projects';

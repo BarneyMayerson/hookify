@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
-import { dashboard, login } from '@/routes';
-import { useAppearance } from '@/composables/useAppearance';
+
 import { Button } from '@/components/ui/button';
+import { useAppearance } from '@/composables/useAppearance';
+import { dashboard, login } from '@/routes';
 
 defineProps<{
   canLogin?: boolean;

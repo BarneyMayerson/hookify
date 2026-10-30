@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import { ref } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { GitBranch, Loader2, Check, Unlink, AlertCircle } from '@lucide/vue';
+import { ref } from 'vue';
+
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -11,7 +13,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
 import { repositories } from '@/routes/github';
 import { update } from '@/routes/projects/repository';
 import type { Project, GitHubRepository } from '@/types';
