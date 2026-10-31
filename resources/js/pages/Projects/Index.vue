@@ -6,6 +6,8 @@ import { ref, computed } from 'vue';
 import CreateProjectForm from '@/components/Projects/CreateProjectForm.vue';
 import ProjectCard from '@/components/Projects/ProjectCard.vue';
 import { Button } from '@/components/ui/button';
+import { dashboard } from '@/routes';
+import { index as projectsIndex } from '@/routes/projects';
 import type { ProjectSummary, CatalogEntry } from '@/types';
 
 const props = defineProps<{
@@ -13,6 +15,21 @@ const props = defineProps<{
   catalog: CatalogEntry[];
   apiBase: string;
 }>();
+
+defineOptions({
+  layout: {
+    breadcrumbs: [
+      {
+        title: 'Dashboard',
+        href: dashboard().url,
+      },
+      {
+        title: 'Projects',
+        href: projectsIndex().url,
+      },
+    ],
+  },
+});
 
 const page = usePage<{ flash?: { plaintext_token?: string } }>();
 const plaintextToken = computed(() => page.props.flash?.plaintext_token);

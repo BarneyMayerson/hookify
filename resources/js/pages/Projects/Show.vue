@@ -15,6 +15,8 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { dashboard } from '@/routes';
+import { index as projectsIndex } from '@/routes/projects';
 import { destroy, index } from '@/routes/projects';
 import { update } from '@/routes/projects/rules';
 import type { Project, Check } from '@/types';
@@ -24,6 +26,24 @@ const props = defineProps<{
   catalog: Check[];
   enabledIds: string[];
 }>();
+
+defineOptions({
+  layout: {
+    breadcrumbs: [
+      {
+        title: 'Dashboard',
+        href: dashboard().url,
+      },
+      {
+        title: 'Projects',
+        href: projectsIndex().url,
+      },
+      {
+        title: 'Project Settings',
+      },
+    ],
+  },
+});
 
 const form = useForm({
   check_ids: [...props.enabledIds],
