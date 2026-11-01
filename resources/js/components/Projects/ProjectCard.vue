@@ -5,6 +5,7 @@ import { computed } from 'vue';
 
 import GitHubRepoPicker from '@/components/Projects/GitHubRepoPicker.vue';
 import { Button } from '@/components/ui/button';
+import { useRelativeDate } from '@/composables/useRelativeDate';
 import { show } from '@/routes/projects';
 import type { ProjectSummary } from '@/types';
 
@@ -13,6 +14,8 @@ const props = defineProps<{
 }>();
 
 const rulesCount = computed(() => props.project.enabledIds?.length ?? 0);
+
+const lastSyncedLabel = useRelativeDate(() => props.project.last_synced_at);
 </script>
 
 <template>
@@ -39,7 +42,7 @@ const rulesCount = computed(() => props.project.enabledIds?.length ?? 0);
         <span>•</span>
         <div class="flex items-center gap-1">
           <Clock class="text-muted-foreground size-3.5" />
-          <span>{{ project.last_synced_at || 'Never synced' }}</span>
+          <span>{{ lastSyncedLabel }}</span>
         </div>
       </div>
     </div>
