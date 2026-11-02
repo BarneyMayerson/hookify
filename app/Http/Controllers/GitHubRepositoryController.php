@@ -12,6 +12,11 @@ class GitHubRepositoryController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
+        $validated = $request->validate([
+            'page' => ['sometimes', 'integer', 'min:1'],
+        ]);
+
+        $page = (int) ($validated['page'] ?? 1);
         $user = $request->user();
 
         if (! $user->github_token) {
@@ -29,6 +34,7 @@ class GitHubRepositoryController extends Controller
             ->get('https://api.github.com/user/repos', [
                 'sort' => 'updated',
                 'per_page' => 100,
+                'page' => $page,
                 'affiliation' => 'owner,collaborator,organization_member',
             ]);
 
@@ -53,6 +59,15 @@ class GitHubRepositoryController extends Controller
             ])
             ->values();
 
-        return response()->json(['repositories' => $repositories]);
+        $hasMore = preg_match(
+            '/<[^>]+>\s*;\s*rel="?next"?/i',
+            (string) $response->header('Link'),
+        ) === 1;
+
+        return response()->json([
+            'repositories' => $repositories,
+            'page' => $page,
+            'has_more' => $hasMore,
+        ]);
     }
 }
