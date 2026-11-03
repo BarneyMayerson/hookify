@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Http\Controllers\Api\ManifestController;
 use App\Http\Middleware\AuthenticateProjectToken;
 use Illuminate\Support\Facades\Route;
