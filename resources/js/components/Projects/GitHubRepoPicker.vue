@@ -26,30 +26,47 @@ const isLoading = ref(false);
 const isSaving = ref(false);
 const errorMessage = ref<string | null>(null);
 const repoList = ref<GitHubRepository[]>([]);
+const currentPage = ref(0);
+const hasMore = ref(false);
+const hasFetched = ref(false);
 
-async function fetchRepositories() {
-  if (repoList.value.length > 0) return;
+interface RepositoryPage {
+  repositories: GitHubRepository[];
+  page: number;
+  has_more: boolean;
+  message?: string;
+}
+
+async function fetchRepositories(page: number) {
+  if (isLoading.value || (page > 1 && !hasMore.value)) return;
 
   isLoading.value = true;
   errorMessage.value = null;
 
   try {
-    const response = await fetch(repositories().url, {
+    const response = await fetch(repositories({ query: { page } }).url, {
       headers: {
         Accept: 'application/json',
       },
     });
 
-    const data = await response.json();
+    const data: RepositoryPage = await response.json();
 
     if (!response.ok) {
       errorMessage.value = data.message || 'Failed to fetch repositories.';
       return;
     }
 
-    repoList.value = data.repositories;
-  } catch {
-    errorMessage.value = 'Network error while fetching repositories. Please try again.';
+    const uniqueRepositories = new Map(
+      [...repoList.value, ...data.repositories].map((repo) => [repo.id, repo]),
+    );
+    repoList.value = [...uniqueRepositories.values()];
+    currentPage.value = data.page;
+    hasMore.value = data.has_more;
+    hasFetched.value = true;
+  } catch (error) {
+    errorMessage.value =
+      error instanceof Error ? error.message : 'Network error while fetching repositories.';
   } finally {
     isLoading.value = false;
   }
@@ -57,8 +74,8 @@ async function fetchRepositories() {
 
 function handleOpenChange(open: boolean) {
   isOpen.value = open;
-  if (open) {
-    fetchRepositories();
+  if (open && !hasFetched.value) {
+    fetchRepositories(1);
   }
 }
 
@@ -107,18 +124,18 @@ function linkRepository(selectedRepo: GitHubRepository | null) {
         </DialogDescription>
       </DialogHeader>
 
-      <!-- Loading State -->
+      <!-- Initial Loading State -->
       <div
-        v-if="isLoading"
+        v-if="isLoading && repoList.length === 0"
         class="text-muted-foreground flex flex-col items-center justify-center py-8"
       >
         <Loader2 class="text-primary mb-2 size-8 animate-spin" />
         <p class="text-sm">Fetching repositories from GitHub...</p>
       </div>
 
-      <!-- Error State -->
+      <!-- Initial Error State -->
       <div
-        v-else-if="errorMessage"
+        v-else-if="errorMessage && repoList.length === 0"
         class="rounded-lg border border-amber-500/30 bg-amber-500/10 p-4"
       >
         <div class="flex items-start gap-3">
@@ -128,6 +145,15 @@ function linkRepository(selectedRepo: GitHubRepository | null) {
             <p class="mt-1 text-amber-700 dark:text-amber-400">
               Please reconnect your GitHub account to restore access.
             </p>
+            <Button
+              variant="outline"
+              size="sm"
+              class="mt-3"
+              :disabled="isLoading"
+              @click="fetchRepositories(1)"
+            >
+              Retry
+            </Button>
           </div>
         </div>
       </div>
@@ -183,6 +209,38 @@ function linkRepository(selectedRepo: GitHubRepository | null) {
             <Check v-if="project.github_repo_id === repo.id" class="text-primary size-4 shrink-0" />
           </button>
         </div>
+
+        <p
+          v-if="hasFetched && repoList.length === 0"
+          class="text-muted-foreground py-4 text-center text-sm"
+        >
+          No repositories found.
+        </p>
+
+        <p
+          v-if="errorMessage && repoList.length > 0"
+          class="text-sm text-amber-700 dark:text-amber-300"
+          role="alert"
+        >
+          {{ errorMessage }}
+        </p>
+
+        <Button
+          v-if="hasMore"
+          variant="outline"
+          class="w-full"
+          :disabled="isLoading || isSaving"
+          @click="fetchRepositories(currentPage + 1)"
+        >
+          <Loader2 v-if="isLoading" class="size-4 animate-spin" />
+          {{
+            isLoading
+              ? 'Loading...'
+              : errorMessage
+                ? 'Retry loading repositories'
+                : 'Load more repositories'
+          }}
+        </Button>
       </div>
 
       <DialogFooter>

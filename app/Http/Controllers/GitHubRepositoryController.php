@@ -33,7 +33,7 @@ class GitHubRepositoryController extends Controller
             ->acceptJson()
             ->get('https://api.github.com/user/repos', [
                 'sort' => 'updated',
-                'per_page' => 100,
+                'per_page' => 25,
                 'page' => $page,
                 'affiliation' => 'owner,collaborator,organization_member',
             ]);
