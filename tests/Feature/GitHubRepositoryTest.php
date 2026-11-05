@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\GitHubRepositoryController;
 use App\Models\User;
 use Illuminate\Support\Facades\Http;
 
@@ -53,7 +54,7 @@ describe('GitHub repository listing', function () {
             'api.github.com/user/repos*' => Http::response([
                 ['id' => 3, 'full_name' => 'acme/three', 'private' => false],
             ], 200, [
-                'Link' => '<https://api.github.com/user/repos?page=3&per_page=100>; rel="next", <https://api.github.com/user/repos?page=8&per_page=100>; rel="last"',
+                'Link' => '<https://api.github.com/user/repos?page=3&per_page='.GitHubRepositoryController::PER_PAGE.'>; rel="next", <https://api.github.com/user/repos?page=8&per_page='.GitHubRepositoryController::PER_PAGE.'>; rel="last"',
             ]),
         ]);
 
@@ -65,7 +66,7 @@ describe('GitHub repository listing', function () {
             ->assertJsonPath('repositories.0.id', 3);
 
         Http::assertSent(fn ($request) => str_contains($request->url(), 'page=2') &&
-            str_contains($request->url(), 'per_page=100')
+            str_contains($request->url(), 'per_page='.GitHubRepositoryController::PER_PAGE)
         );
     });
 
@@ -88,7 +89,7 @@ describe('GitHub repository listing', function () {
             'api.github.com/user/repos*' => Http::response([
                 ['id' => 1, 'full_name' => 'acme/one', 'private' => false],
             ], 200, [
-                'Link' => '<https://api.github.com/user/repos?page=1&per_page=100>; rel="first"',
+                'Link' => '<https://api.github.com/user/repos?page=1&per_page='.GitHubRepositoryController::PER_PAGE.'>; rel="first"',
             ]),
         ]);
 
