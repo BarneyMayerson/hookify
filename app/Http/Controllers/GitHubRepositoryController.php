@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Http;
 
 class GitHubRepositoryController extends Controller
 {
+    public const int PER_PAGE = 25;
+
     public function index(Request $request): JsonResponse
     {
         $validated = $request->validate([
@@ -33,7 +35,7 @@ class GitHubRepositoryController extends Controller
             ->acceptJson()
             ->get('https://api.github.com/user/repos', [
                 'sort' => 'updated',
-                'per_page' => 25,
+                'per_page' => self::PER_PAGE,
                 'page' => $page,
                 'affiliation' => 'owner,collaborator,organization_member',
             ]);
