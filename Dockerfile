@@ -1,3 +1,8 @@
+ARG PHP_VERSION=8.5
+
+FROM dunglas/frankenphp:1-php${PHP_VERSION} AS base
+RUN install-php-extensions pdo_mysql opcache pcntl intl zip bcmath
+
 FROM composer:2 AS vendor
 WORKDIR /app
 COPY composer.json composer.lock ./
@@ -5,16 +10,18 @@ RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist --ignor
 COPY . .
 RUN composer dump-autoload --optimize --classmap-authoritative --no-dev
 
-FROM node:22-alpine AS assets
+FROM base AS assets
+COPY --from=node:22-slim /usr/local/bin/node /usr/local/bin/node
+COPY --from=node:22-slim /usr/local/lib/node_modules /usr/local/lib/node_modules
+RUN ln -s /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci
-COPY . .
-COPY --from=vendor /app/vendor ./vendor
+COPY --from=vendor /app /app
+RUN cp .env.example .env && php artisan key:generate --force
 RUN npm run build
 
-FROM dunglas/frankenphp:1-php8.4
-RUN install-php-extensions pdo_mysql opcache pcntl intl zip bcmath
+FROM base
 ENV SERVER_NAME=:80
 WORKDIR /app
 COPY --from=vendor /app /app
