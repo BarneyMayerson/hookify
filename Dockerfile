@@ -19,6 +19,8 @@ COPY package*.json ./
 RUN npm ci
 COPY --from=vendor /app /app
 RUN cp .env.example .env && php artisan key:generate --force
+ARG VITE_APP_NAME=Hookify
+ENV VITE_APP_NAME=${VITE_APP_NAME}
 RUN npm run build
 
 FROM base
