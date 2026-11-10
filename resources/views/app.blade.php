@@ -38,8 +38,24 @@
   @fonts
 
   @vite(['resources/css/app.css', 'resources/js/app.ts', "resources/js/pages/{$page['component']}.vue"])
+  <link rel="canonical" href="{{ url()->current() }}">
+
   <x-inertia::head>
-    <title>{{ config('app.name', 'Laravel') }}</title>
+    <title>{{ config('app.name', 'Hookify') }} — ВАШ_СЛОГАН</title>
+    <meta name="description" data-inertia="description" content="Setting up pre-commit hooks">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0a0a0f" media="(prefers-color-scheme: dark)">
+
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="{{ config('app.name', 'Hookify') }}">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:title" data-inertia="og:title" content="{{ config('app.name', 'Hookify') }} — ВАШ_СЛОГАН">
+    <meta property="og:description" data-inertia="og:description" content="ОПИСАНИЕ">
+    <meta property="og:image" content="{{ asset('og-image.png') }}">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:card" content="summary_large_image">
   </x-inertia::head>
 </head>
 
