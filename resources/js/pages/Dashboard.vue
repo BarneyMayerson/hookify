@@ -78,21 +78,23 @@ const props = withDefaults(
     <!-- Stat Cards -->
     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       <!-- Stat 1: Total Projects -->
-      <div class="bg-card border-border rounded-xl border p-5 shadow-sm">
-        <div class="flex items-center justify-between">
-          <span class="text-muted-foreground text-xs font-medium tracking-wider uppercase">
-            Total Projects
-          </span>
-          <div class="bg-primary/10 text-primary rounded-lg p-2">
-            <FolderGit2 class="h-5 w-5" />
+      <Link :href="index().url">
+        <div class="bg-card border-border rounded-xl border p-5 shadow-sm">
+          <div class="flex items-center justify-between">
+            <span class="text-muted-foreground text-xs font-medium tracking-wider uppercase">
+              Total Projects
+            </span>
+            <div class="bg-primary/10 text-primary rounded-lg p-2">
+              <FolderGit2 class="h-5 w-5" />
+            </div>
+          </div>
+          <div class="mt-2 flex items-baseline gap-2">
+            <span class="text-foreground text-3xl font-bold tracking-tight">
+              {{ props.stats.totalProjects }}
+            </span>
           </div>
         </div>
-        <div class="mt-2 flex items-baseline gap-2">
-          <span class="text-foreground text-3xl font-bold tracking-tight">
-            {{ props.stats.totalProjects }}
-          </span>
-        </div>
-      </div>
+      </Link>
 
       <!-- Stat 2: Active Rules -->
       <div class="bg-card border-border rounded-xl border p-5 shadow-sm">
