@@ -15,6 +15,7 @@ const props = defineProps<{
 
 const rulesCount = computed(() => props.project.enabledIds?.length ?? 0);
 
+const hasSynced = computed(() => Boolean(props.project.last_synced_at));
 const lastSyncedLabel = useRelativeDate(() => props.project.last_synced_at);
 </script>
 
@@ -37,12 +38,15 @@ const lastSyncedLabel = useRelativeDate(() => props.project.last_synced_at);
       <div class="text-muted-foreground flex flex-wrap items-center gap-2 pt-2 text-xs">
         <div class="flex items-center gap-1">
           <ShieldCheck class="text-primary size-3.5" />
-          <span>Rules: {{ rulesCount }}</span>
+          <span :class="{ 'text-amber-600 dark:text-amber-400': rulesCount === 0 }">
+            Rules: {{ rulesCount }}
+          </span>
         </div>
         <span>•</span>
         <div class="flex items-center gap-1">
-          <Clock class="text-muted-foreground size-3.5" />
-          <span>{{ lastSyncedLabel }}</span>
+          <Clock class="size-3.5" :class="hasSynced ? 'text-muted-foreground' : 'text-amber-500'" />
+          <span v-if="hasSynced">{{ lastSyncedLabel }}</span>
+          <span v-else class="text-amber-600 dark:text-amber-400">Waiting for first sync</span>
         </div>
       </div>
     </div>

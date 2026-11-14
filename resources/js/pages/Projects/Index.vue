@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { usePage } from '@inertiajs/vue3';
-import { Check, Copy, Terminal } from '@lucide/vue';
-import { ref, computed } from 'vue';
+import { Check, Copy, Terminal, X } from '@lucide/vue';
+import { computed, ref, watch } from 'vue';
 
 import CreateProjectForm from '@/components/Projects/CreateProjectForm.vue';
 import ProjectCard from '@/components/Projects/ProjectCard.vue';
@@ -31,25 +31,46 @@ defineOptions({
   },
 });
 
-const page = usePage<{ flash?: { plaintext_token?: string } }>();
-const plaintextToken = computed(() => page.props.flash?.plaintext_token);
+// Must mirror the default API URL hardcoded in hookify-cli.
+// When the CLI default is switched to hookify.to, update this constant:
+// the HOOKIFY_API part then disappears from the command on production.
+const CLI_DEFAULT_API = 'https://hookify.lan/api/v1';
 
-const installCommand = computed(() =>
-  plaintextToken.value
-    ? `HOOKIFY_TOKEN=${plaintextToken.value} HOOKIFY_API=${props.apiBase} npx hookify-cli sync`
-    : '',
+const page = usePage<{ flash?: { plaintext_token?: string } }>();
+
+// Flash data lives for a single response. Keeping the token in local state
+// means a later Inertia visit (e.g. toggling a rule) doesn't wipe the banner
+// before the user has copied the command.
+const token = ref<string | null>(null);
+
+watch(
+  () => page.props.flash?.plaintext_token,
+  (value) => {
+    if (value) token.value = value;
+  },
+  { immediate: true },
 );
 
-const isCopied = ref(false);
+const installCommand = computed(() => {
+  if (!token.value) return '';
 
-function copyCommand() {
-  if (!installCommand.value) return;
+  const api = props.apiBase !== CLI_DEFAULT_API ? ` HOOKIFY_API=${props.apiBase}` : '';
 
-  navigator.clipboard.writeText(installCommand.value);
-  isCopied.value = true;
-  setTimeout(() => {
-    isCopied.value = false;
-  }, 2000);
+  return `HOOKIFY_TOKEN=${token.value}${api} npx hookify-cli sync`;
+});
+
+const copied = ref<'command' | 'token' | null>(null);
+
+async function copy(kind: 'command' | 'token', text: string) {
+  if (!text) return;
+
+  try {
+    await navigator.clipboard.writeText(text);
+    copied.value = kind;
+    setTimeout(() => (copied.value = null), 2000);
+  } catch {
+    // Clipboard unavailable: the text is select-all, so it can be copied manually.
+  }
 }
 </script>
 
@@ -64,38 +85,67 @@ function copyCommand() {
       </div>
     </div>
 
-    <!-- Token Banner After Project Creation -->
+    <!-- Token banner after project creation -->
     <div
-      v-if="plaintextToken"
+      v-if="token"
+      role="status"
       class="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4"
     >
       <div class="flex items-start justify-between gap-4">
         <div class="space-y-1">
           <p class="text-sm font-semibold text-emerald-700 dark:text-emerald-300">
-            Project Created Successfully!
+            Project created
           </p>
-          <p class="text-xs text-emerald-600 dark:text-emerald-400">
-            Copy this command to initialize and sync Git hooks locally in your repository:
+          <p class="text-xs font-medium text-emerald-700 dark:text-emerald-300">
+            Copy the command now. The token won't be shown again.
           </p>
         </div>
-        <Button variant="outline" size="sm" class="shrink-0 gap-1.5" @click="copyCommand">
-          <Check v-if="isCopied" class="size-4 text-emerald-600" />
-          <Copy v-else class="size-4" />
-          {{ isCopied ? 'Copied!' : 'Copy CLI Command' }}
-        </Button>
+        <div class="flex shrink-0 items-center gap-1">
+          <Button
+            variant="outline"
+            size="sm"
+            class="gap-1.5"
+            @click="copy('command', installCommand)"
+          >
+            <Check v-if="copied === 'command'" class="size-4 text-emerald-600" />
+            <Copy v-else class="size-4" />
+            {{ copied === 'command' ? 'Copied' : 'Copy command' }}
+          </Button>
+          <Button variant="ghost" size="icon" aria-label="Dismiss" @click="token = null">
+            <X class="size-4" />
+          </Button>
+        </div>
       </div>
+
       <div
         class="bg-muted mt-3 flex items-center gap-2 overflow-x-auto rounded-lg p-3 font-mono text-xs"
       >
-        <Terminal class="text-muted-foreground size-4 shrink-0" />
-        <code class="text-foreground">{{ installCommand }}</code>
+        <Terminal class="text-muted-foreground size-4 shrink-0" aria-hidden="true" />
+        <code class="text-foreground whitespace-nowrap select-all">{{ installCommand }}</code>
+      </div>
+
+      <ol class="text-muted-foreground mt-4 list-decimal space-y-1 pl-5 text-xs">
+        <li>Open Settings on the new project's card below and enable the checks you need.</li>
+        <li>Run the command in the root of your repository.</li>
+        <li>Run it again after you change the rules to update the hooks.</li>
+      </ol>
+
+      <div class="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+        <p class="text-muted-foreground">Don't commit the token. In CI, store it as a secret.</p>
+        <button
+          type="button"
+          class="text-primary hover:text-primary/80 font-medium transition-colors"
+          @click="copy('token', token)"
+        >
+          {{ copied === 'token' ? 'Token copied' : 'Copy token only' }}
+        </button>
       </div>
     </div>
 
-    <!-- Create Project Form -->
+    <!-- Create project form -->
     <CreateProjectForm />
 
-    <!-- Projects Grid -->
+    <!-- Projects grid -->
     <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       <ProjectCard v-for="project in projects" :key="project.id" :project />
     </div>
