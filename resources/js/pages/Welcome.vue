@@ -26,14 +26,30 @@ const cta = computed(() =>
 const description =
   'Hookify keeps Git hooks in one place and syncs them to every developer with a single command. Enforce PHP, JS/TS and universal checks across your team.';
 
-// Illustrative output. Adjust to match the real hookify-cli output.
-const terminalLines = [
-  { text: 'npx hookify-cli sync', kind: 'command' },
-  { text: 'Fetching rules for this project', kind: 'info' },
-  { text: 'PHP checks enabled', kind: 'ok' },
-  { text: 'JS/TS checks enabled', kind: 'ok' },
-  { text: 'Git hooks installed', kind: 'ok' },
-] as const;
+type TerminalLine =
+  | { kind: 'command' | 'heading' | 'ok' | 'fail' | 'item' | 'output' | 'plain'; text: string }
+  | { kind: 'blank' };
+
+// Mirrors the real output of `hookify-cli sync` and of the generated pre-commit
+// hook. The failing phpstan output is illustrative. Keep it in sync with the CLI.
+const terminalLines: TerminalLine[] = [
+  { kind: 'command', text: 'HOOKIFY_TOKEN=<project-token> npx hookify-cli sync' },
+  { kind: 'heading', text: 'Hookify · my-project' },
+  { kind: 'ok', text: 'Config fetched from hookify.to' },
+  { kind: 'ok', text: 'pre-commit hook installed (3 checks)' },
+  { kind: 'item', text: 'pint' },
+  { kind: 'item', text: 'phpstan' },
+  { kind: 'item', text: 'oxfmt' },
+  { kind: 'blank' },
+  { kind: 'plain', text: '1 hook active.' },
+  { kind: 'blank' },
+  { kind: 'command', text: 'git commit -m "Add login form"' },
+  { kind: 'ok', text: 'pint' },
+  { kind: 'fail', text: 'phpstan' },
+  { kind: 'output', text: 'Line 12  Undefined variable: $user' },
+  { kind: 'blank' },
+  { kind: 'plain', text: 'phpstan failed. Commit aborted.' },
+];
 
 const before = [
   'Hook scripts are copied between machines by hand.',
@@ -59,7 +75,7 @@ const steps = [
   {
     title: 'Run the CLI sync',
     text: 'Run the command below in your repository. Hooks are installed and kept up to date.',
-    code: 'npx hookify-cli sync',
+    code: 'HOOKIFY_TOKEN=<project-token> npx hookify-cli sync',
   },
 ];
 
@@ -93,7 +109,7 @@ const faq = [
   },
   {
     q: 'What do I need to run the CLI?',
-    a: 'Node.js, so that npx is available. Run npx hookify-cli sync in the root of your repository.',
+    a: 'Node.js, so that npx is available. Set HOOKIFY_TOKEN to your project token and run npx hookify-cli sync in the root of your repository.',
   },
   {
     q: 'Which languages are supported?',
@@ -160,15 +176,33 @@ const faq = [
           <Terminal class="h-3.5 w-3.5" aria-hidden="true" />
           my-project
         </div>
-        <div class="space-y-1.5 p-5 text-left font-mono text-sm">
-          <template v-for="line in terminalLines" :key="line.text">
-            <p v-if="line.kind === 'command'" class="text-zinc-100">
-              <span class="text-violet-400 select-none">$ </span>{{ line.text }}
+        <div class="overflow-x-auto p-5 text-left font-mono text-sm leading-relaxed whitespace-pre">
+          <template v-for="(line, index) in terminalLines" :key="index">
+            <div v-if="line.kind === 'blank'" class="h-4" aria-hidden="true"></div>
+
+            <p v-else-if="line.kind === 'command'" class="text-zinc-100">
+              <span class="mr-2 text-violet-400 select-none">$</span>{{ line.text }}
             </p>
+
+            <p v-else-if="line.kind === 'heading'" class="font-semibold text-zinc-100">
+              {{ line.text }}
+            </p>
+
             <p v-else-if="line.kind === 'ok'" class="text-zinc-300">
               <span class="mr-2 text-emerald-400 select-none">✔</span>{{ line.text }}
             </p>
-            <p v-else class="text-zinc-500">{{ line.text }}</p>
+
+            <p v-else-if="line.kind === 'fail'" class="text-zinc-300">
+              <span class="mr-2 text-red-400 select-none">✖</span>{{ line.text }}
+            </p>
+
+            <p v-else-if="line.kind === 'item'" class="pl-4 text-zinc-300">
+              <span class="mr-2 text-zinc-600 select-none">•</span>{{ line.text }}
+            </p>
+
+            <p v-else-if="line.kind === 'output'" class="pl-4 text-zinc-500">{{ line.text }}</p>
+
+            <p v-else class="text-zinc-300">{{ line.text }}</p>
           </template>
         </div>
       </div>
@@ -230,7 +264,7 @@ const faq = [
           <p class="text-muted-foreground mt-1.5 text-sm leading-relaxed">{{ step.text }}</p>
           <code
             v-if="step.code"
-            class="bg-muted text-foreground mt-3 block rounded-md px-3 py-2 font-mono text-xs"
+            class="bg-muted text-foreground mt-3 block overflow-x-auto rounded-md px-3 py-2 font-mono text-xs whitespace-nowrap"
           >
             {{ step.code }}
           </code>

@@ -31,7 +31,7 @@ services:
 networks:
   shared:
     external: true
-    name: i-chingspace_sail
+    name: ${SHARED_NETWORK_NAME}
 
 volumes:
   storage:
