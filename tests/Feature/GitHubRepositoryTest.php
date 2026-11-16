@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\GitHubRepositoryController;
 use App\Models\User;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
 
 use function Pest\Laravel\actingAs;
@@ -115,6 +116,62 @@ describe('GitHub repository listing', function () {
         $user = User::factory()->create(['github_token' => 'gh_token_123']);
 
         Http::fake(['api.github.com/user/repos*' => Http::response('', 500)]);
+
+        actingAs($user)->getJson(route('github.repositories'))->assertStatus(502);
+    });
+
+    it('reports whether private repositories are accessible', function (array $scopes, bool $expected) {
+        $user = User::factory()->create(['github_token' => 'gh_token_123', 'github_scopes' => $scopes]);
+
+        Http::fake(['api.github.com/user/repos*' => Http::response([], 200)]);
+
+        actingAs($user)
+            ->getJson(route('github.repositories'))
+            ->assertOk()
+            ->assertJsonPath('private_access', $expected);
+    })->with([
+        'identity only' => [['user:email'], false],
+        'repo granted' => [['user:email', 'repo'], true],
+    ]);
+
+    it('forgets the token when GitHub rejects it', function () {
+        $user = User::factory()->create(['github_token' => 'gh_stale_token', 'github_scopes' => ['repo']]);
+
+        Http::fake(['api.github.com/user/repos*' => Http::response(['message' => 'Bad credentials'], 401)]);
+
+        actingAs($user)->getJson(route('github.repositories'))->assertStatus(409);
+
+        expect($user->fresh())
+            ->github_token->toBeNull()
+            ->github_scopes->toBeNull();
+    });
+
+    it('returns 429 when GitHub rate limits the request', function (array $headers) {
+        $user = User::factory()->create(['github_token' => 'gh_token_123']);
+
+        Http::fake(['api.github.com/user/repos*' => Http::response([], 403, $headers)]);
+
+        actingAs($user)
+            ->getJson(route('github.repositories'))
+            ->assertStatus(429)
+            ->assertJsonPath('message', 'GitHub rate limit reached. Try again in a few minutes.');
+    })->with([
+        'primary limit' => [['X-RateLimit-Remaining' => '0']],
+        'secondary limit' => [['Retry-After' => '60']],
+    ]);
+
+    it('returns 409 on a 403 that is not a rate limit', function () {
+        $user = User::factory()->create(['github_token' => 'gh_token_123']);
+
+        Http::fake(['api.github.com/user/repos*' => Http::response([], 403)]);
+
+        actingAs($user)->getJson(route('github.repositories'))->assertStatus(409);
+    });
+
+    it('returns 502 when GitHub is unreachable', function () {
+        $user = User::factory()->create(['github_token' => 'gh_token_123']);
+
+        Http::fake(['api.github.com/user/repos*' => fn () => throw new ConnectionException('timed out')]);
 
         actingAs($user)->getJson(route('github.repositories'))->assertStatus(502);
     });

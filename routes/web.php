@@ -24,6 +24,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('github/repositories', [GitHubRepositoryController::class, 'index'])->name('github.repositories');
 });
 
+Route::get('auth/github/repo-access', [GitHubController::class, 'requestRepoAccess'])
+    ->middleware('auth')
+    ->name('auth.github.repo-access');
+
 Route::get('auth/github/redirect', [GitHubController::class, 'redirect'])->name('auth.github.redirect');
 Route::get('auth/github/callback', [GitHubController::class, 'callback'])->name('auth.github.callback');
 

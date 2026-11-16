@@ -14,6 +14,7 @@ const props = defineProps<{
   projects: ProjectSummary[];
   catalog: CatalogEntry[];
   apiBase: string;
+  openRepoPickerFor?: number | null;
 }>();
 
 defineOptions({
@@ -76,6 +77,10 @@ async function copy(kind: 'command' | 'token', text: string) {
 
 <template>
   <div class="space-y-6 p-6">
+    <p v-if="page.props.errors?.github" class="text-destructive text-sm" role="alert">
+      {{ page.props.errors.github }}
+    </p>
+
     <div class="flex items-center justify-between">
       <div>
         <h1 class="text-foreground text-2xl font-bold tracking-tight">Projects</h1>
@@ -147,7 +152,12 @@ async function copy(kind: 'command' | 'token', text: string) {
 
     <!-- Projects grid -->
     <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-      <ProjectCard v-for="project in projects" :key="project.id" :project />
+      <ProjectCard
+        v-for="project in projects"
+        :key="project.id"
+        :project
+        :open-picker="project.id === openRepoPickerFor"
+      />
     </div>
   </div>
 </template>

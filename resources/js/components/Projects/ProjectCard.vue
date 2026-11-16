@@ -11,6 +11,7 @@ import type { ProjectSummary } from '@/types';
 
 const props = defineProps<{
   project: ProjectSummary;
+  openPicker?: boolean;
 }>();
 
 const rulesCount = computed(() => props.project.enabledIds?.length ?? 0);
@@ -53,7 +54,7 @@ const lastSyncedLabel = useRelativeDate(() => props.project.last_synced_at);
 
     <!-- Bottom Bar -->
     <div class="border-border mt-5 flex items-center justify-between border-t pt-4">
-      <GitHubRepoPicker :project />
+      <GitHubRepoPicker :project :auto-open="openPicker" />
 
       <Button as-child variant="ghost" size="sm" class="gap-1 text-xs">
         <Link :href="show(project.id).url">

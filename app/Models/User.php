@@ -22,6 +22,7 @@ use Illuminate\Support\Carbon;
  * @property string|null $github_nickname
  * @property string|null $github_avatar
  * @property string|null $github_token
+ * @property list<string>|null $github_scopes
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
@@ -43,6 +44,8 @@ class User extends Authenticatable
             // Grants repo-scoped access to the user's GitHub account —
             // must never be stored in plaintext.
             'github_token' => 'encrypted',
+            // Scopes GitHub actually granted with this token.
+            'github_scopes' => 'array',
         ];
 
     }
@@ -53,5 +56,10 @@ class User extends Authenticatable
     public function projects(): HasMany
     {
         return $this->hasMany(Project::class);
+    }
+
+    public function hasRepoAccess(): bool
+    {
+        return in_array('repo', $this->github_scopes ?? [], true);
     }
 }

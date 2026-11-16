@@ -41,6 +41,8 @@ class ProjectController extends Controller
             // https://hookify.dev/api/v1) — the command must point at
             // whichever server it was copied from (dev .lan, prod, etc.).
             'apiBase' => rtrim(config('app.url'), '/').'/api/v1',
+            // One-time: set by the GitHub repo-access flow so the picker reopens.
+            'openRepoPickerFor' => session()->pull('open_repo_picker'),
         ]);
     }
 
