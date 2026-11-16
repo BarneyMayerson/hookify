@@ -35,7 +35,7 @@ defineOptions({
 // Must mirror the default API URL hardcoded in hookify-cli.
 // When the CLI default is switched to hookify.to, update this constant:
 // the HOOKIFY_API part then disappears from the command on production.
-const CLI_DEFAULT_API = 'https://hookify.lan/api/v1';
+const CLI_DEFAULT_API = 'https://hookify.to/api/v1';
 
 const page = usePage<{ flash?: { plaintext_token?: string } }>();
 

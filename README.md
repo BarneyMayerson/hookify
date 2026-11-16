@@ -84,7 +84,8 @@ A production `Dockerfile` is included as a starting point.
 - Project tokens are stored only as a hash (plus a short prefix for display). The full token is shown once, right after the project is created, and cannot be recovered.
 - Hook commands come only from the fixed catalog, never from user input. A project's name is the only free text that ends up in a generated hook, and the CLI sanitizes it.
 - The hooks run commands on developers' machines at every commit, so the manifest endpoint is a sensitive surface. If you run your own instance, keep it up to date and behind HTTPS.
-- Sign-in requests the GitHub scopes `user:email` and `repo`; `repo` is used to let you pick the repository a project is bound to.
+- Sign-in requests only the GitHub scope `user:email`. Listing your private repositories needs the broader `repo` scope, because GitHub OAuth Apps have no read-only scope for them. Hookify asks for it only when you press "Include private repositories" in the repository picker, and uses it only to list your repositories.
+- Your GitHub access token is stored encrypted and is never sent to the browser. Hookify also records which scopes GitHub actually granted, and forgets a token as soon as GitHub rejects it. You can revoke the access at any time in your GitHub settings under Applications.
 
 Please report vulnerabilities privately through GitHub's [security advisories](https://github.com/BarneyMayerson/hookify/security/advisories/new) rather than in a public issue.
 
