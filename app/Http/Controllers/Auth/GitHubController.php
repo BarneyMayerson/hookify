@@ -76,7 +76,7 @@ class GitHubController extends Controller
         if ($request->filled('error')) {
             return $repoAccessFlow
                 ? redirect()->route('projects.index')
-                    ->withErrors(['github' => 'Access to private repositories was not granted.'])
+                    ->withErrors(['github' => 'Access to private repositories was not granted. You can grant it later from the repository picker.'])
                 : redirect()->route('login')
                     ->withErrors(['github' => 'GitHub sign-in was cancelled.']);
         }

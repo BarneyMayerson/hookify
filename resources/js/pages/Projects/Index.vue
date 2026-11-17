@@ -3,6 +3,7 @@ import { usePage } from '@inertiajs/vue3';
 import { Check, Copy, Terminal, X } from '@lucide/vue';
 import { computed, ref, watch } from 'vue';
 
+import GitHubNotice from '@/components/GitHubNotice.vue';
 import CreateProjectForm from '@/components/Projects/CreateProjectForm.vue';
 import ProjectCard from '@/components/Projects/ProjectCard.vue';
 import { Button } from '@/components/ui/button';
@@ -77,10 +78,6 @@ async function copy(kind: 'command' | 'token', text: string) {
 
 <template>
   <div class="space-y-6 p-6">
-    <p v-if="page.props.errors?.github" class="text-destructive text-sm" role="alert">
-      {{ page.props.errors.github }}
-    </p>
-
     <div class="flex items-center justify-between">
       <div>
         <h1 class="text-foreground text-2xl font-bold tracking-tight">Projects</h1>
@@ -89,6 +86,8 @@ async function copy(kind: 'command' | 'token', text: string) {
         </p>
       </div>
     </div>
+
+    <GitHubNotice />
 
     <!-- Token banner after project creation -->
     <div
