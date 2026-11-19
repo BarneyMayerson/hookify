@@ -37,10 +37,7 @@ class ProjectController extends Controller
             'catalog' => collect(ChecksCatalog::all())
                 ->map(fn (array $check, string $id) => ['id' => $id, 'label' => $check['label']])
                 ->values(),
-            // Not relying on the CLI's default (HOOKIFY_API is hardcoded to
-            // https://hookify.dev/api/v1) — the command must point at
-            // whichever server it was copied from (dev .lan, prod, etc.).
-            'apiBase' => rtrim(config('app.url'), '/').'/api/v1',
+            'apiBase' => $this->apiBase(),
             // One-time: set by the GitHub repo-access flow so the picker reopens.
             'openRepoPickerFor' => session()->pull('open_repo_picker'),
         ]);
@@ -65,6 +62,7 @@ class ProjectController extends Controller
                 ])
                 ->values(),
             'enabledIds' => $project->rules()->pluck('check_id'),
+            'apiBase' => $this->apiBase(),
         ]);
     }
 
@@ -94,5 +92,16 @@ class ProjectController extends Controller
         $project->delete();
 
         return Redirect::route('projects.index');
+    }
+
+    /**
+     * The API URL the CLI command must point at: this server. The frontend
+     * adds HOOKIFY_API to the command only when it differs from the CLI's
+     * built-in default (hookify.to), so dev (.lan) and self-hosted instances
+     * get a working command too.
+     */
+    private function apiBase(): string
+    {
+        return rtrim(config('app.url'), '/').'/api/v1';
     }
 }

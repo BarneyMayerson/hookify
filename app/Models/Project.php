@@ -82,4 +82,34 @@ class Project extends Model
     {
         return static::where('api_token_hash', hash('sha256', $token))->first();
     }
+
+    /**
+     * Replaces the project's token. The old one stops working immediately,
+     * because requests are matched by hash. Returns the new plaintext token,
+     * which is shown to the user exactly once.
+     */
+    public function regenerateToken(): string
+    {
+        [$token, $tokenColumns] = self::issueToken();
+
+        $this->forceFill($tokenColumns)->save();
+
+        return $token;
+    }
+
+    /**
+     * A fresh token and the columns to store for it: only the hash and a short
+     * display prefix are persisted, never the token itself.
+     *
+     * @return array{0: string, 1: array{api_token_hash: string, api_token_prefix: string}}
+     */
+    private static function issueToken(): array
+    {
+        $token = 'hk_live_'.Str::random(40);
+
+        return [$token, [
+            'api_token_hash' => hash('sha256', $token),
+            'api_token_prefix' => substr($token, 0, 16),
+        ]];
+    }
 }

@@ -6,6 +6,7 @@ use App\Http\Controllers\GitHubRepositoryController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProjectRepositoryController;
 use App\Http\Controllers\ProjectRuleController;
+use App\Http\Controllers\RegenerateProjectTokenController;
 use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'Welcome')->name('home');
@@ -22,6 +23,10 @@ Route::middleware(['auth'])->group(function () {
     Route::patch('projects/{project}/repository', [ProjectRepositoryController::class, 'update'])->name('projects.repository.update');
 
     Route::get('github/repositories', [GitHubRepositoryController::class, 'index'])->name('github.repositories');
+
+    Route::post('projects/{project}/token', RegenerateProjectTokenController::class)
+        ->middleware('throttle:6,1')
+        ->name('projects.token.regenerate');
 });
 
 Route::get('auth/github/repo-access', [GitHubController::class, 'requestRepoAccess'])

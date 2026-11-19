@@ -4,6 +4,8 @@ import { ArrowLeft, Save, AlertTriangle, Trash2 } from '@lucide/vue';
 import { computed, ref } from 'vue';
 
 import GitHubRepoPicker from '@/components/Projects/GitHubRepoPicker.vue';
+import ProjectTokenCard from '@/components/Projects/ProjectTokenCard.vue';
+import TokenBanner from '@/components/Projects/TokenBanner.vue';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -16,7 +18,6 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { dashboard } from '@/routes';
-import { index as projectsIndex } from '@/routes/projects';
 import { destroy, index } from '@/routes/projects';
 import { update } from '@/routes/projects/rules';
 import type { Project, Check } from '@/types';
@@ -25,6 +26,7 @@ const props = defineProps<{
   project: Project;
   catalog: Check[];
   enabledIds: string[];
+  apiBase: string;
 }>();
 
 defineOptions({
@@ -36,7 +38,7 @@ defineOptions({
       },
       {
         title: 'Projects',
-        href: projectsIndex().url,
+        href: index().url,
       },
       {
         title: 'Project Settings',
@@ -119,6 +121,9 @@ function deleteProject() {
         </Button>
       </div>
     </div>
+
+    <!-- Shown once, right after the token was regenerated -->
+    <TokenBanner mode="regenerated" :api-base="apiBase" />
 
     <!-- Rules Selection -->
     <form @submit.prevent="submit" class="space-y-8">
@@ -207,7 +212,7 @@ function deleteProject() {
                 <p class="text-[11px] leading-normal">
                   {{
                     check.requiresBinary
-                      ? 'Requires standalone binary on dev machine (fails with "command not found" otherwise).'
+                      ? 'Requires a standalone binary on each developer machine (the hook reports it as missing and blocks the commit otherwise).'
                       : 'Requires configuration file in repo root (will fail on commit if missing).'
                   }}
                 </p>
@@ -241,14 +246,16 @@ function deleteProject() {
       </div>
     </form>
 
+    <ProjectTokenCard :project />
+
     <!-- Danger Zone -->
     <div class="rounded-xl border border-red-500/30 bg-red-500/10 p-5">
       <h2 class="text-sm font-semibold text-red-700 dark:text-red-300">Danger zone</h2>
       <p class="mt-1 text-xs text-red-600 dark:text-red-400">
         Deleting a project revokes its token immediately. The next time anyone runs
-        <code class="font-mono">hookify sync</code> for it, the CLI will report the invalid token
-        and remove the hooks it installed. Until then, hooks already installed on a machine keep
-        running locally — they don't contact Hookify on their own.
+        <code class="font-mono">npx hookify-cli sync</code> for it, the CLI will report the invalid
+        token and remove the hooks it installed. Until then, hooks already installed on a machine
+        keep running locally — they don't contact Hookify on their own.
       </p>
 
       <Dialog v-model:open="isDeleteOpen">
