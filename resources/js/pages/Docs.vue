@@ -30,6 +30,7 @@ const article = ref<HTMLElement | null>(null);
 const { items, activeId, goTo } = useTableOfContents(article);
 
 // Keep the output examples in sync with what hookify-cli really prints.
+// !!! Wrapped in ref(): without it vue-tsc reports a bogus "Property 'value' does not exist" in the template.
 const snippets = ref({
   syncOutput: `Hookify · my-project
 ✔ Config fetched from hookify.to
