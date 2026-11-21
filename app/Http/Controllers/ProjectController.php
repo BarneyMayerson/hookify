@@ -88,7 +88,7 @@ class ProjectController extends Controller
         // project_rules cascades via the FK constraint — nothing else to
         // clean up here. The token hash goes with it, so any CLI already
         // caching a manifest for this project will start getting 401s on
-        // its next successful network sync (see fail-open follow-up).
+        // its next successful network sync.
         $project->delete();
 
         return Redirect::route('projects.index');

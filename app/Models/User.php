@@ -50,6 +50,15 @@ class User extends Authenticatable
 
     }
 
+    protected static function booted(): void
+    {
+        // The projects are removed by the foreign key's cascade, which fires no
+        // model events: retire their tokens here.
+        static::deleting(function (self $user): void {
+            $user->projects->each->retireCurrentToken();
+        });
+    }
+
     /**
      * @return HasMany<Project, $this>
      */

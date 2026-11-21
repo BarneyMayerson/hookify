@@ -233,8 +233,8 @@ phpstan failed. Commit aborted.`,
           If a token is lost or leaked, open the project's <strong>Settings</strong> and choose
           <strong>Regenerate token</strong>. A new token is shown once, and the old one stops
           working immediately. Update it wherever it was used: in your teammates' environments and
-          in CI secrets. Anyone who runs <code>sync</code> with the old token gets an error, and
-          their Hookify hooks are removed until they use the new one.
+          in CI secrets. Anyone who runs <code>sync</code> with the old token gets an error. Their
+          installed hooks keep working, but won’t update until they use the new token.
         </p>
 
         <h3 id="deleting-a-project">Deleting a project</h3>

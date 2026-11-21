@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
+use App\Enums\TokenRejection;
 use App\Models\Project;
 use Closure;
 use Illuminate\Http\Request;
@@ -15,8 +16,20 @@ class AuthenticateProjectToken
     {
         $token = $request->bearerToken();
 
-        if ($token === null || ($project = Project::findByPlaintextToken($token)) === null) {
-            return response()->json(['message' => 'Invalid project token.'], 401);
+        if ($token === null) {
+            return response()->json([
+                'message' => 'Unauthenticated.',
+                'reason' => TokenRejection::InvalidToken->value,
+            ], 401);
+        }
+
+        $project = Project::findByPlaintextToken($token);
+
+        if ($project === null) {
+            return response()->json([
+                'message' => 'Unauthenticated.',
+                'reason' => Project::rejectionReason($token)->value,
+            ], 401);
         }
 
         $request->attributes->set('project', $project);

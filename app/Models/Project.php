@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\TokenRejection;
 use App\Support\ChecksCatalog;
 use Database\Factories\ProjectFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -11,9 +12,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 /**
+ * @property string $api_token_hash
  * @property Carbon|null $last_synced_at
  */
 class Project extends Model
@@ -22,6 +25,13 @@ class Project extends Model
     use HasFactory;
 
     protected $hidden = ['api_token_hash'];
+
+    protected static function booted(): void
+    {
+        // Whatever deletes a project (the dashboard, an account deletion), its
+        // token must stay recognisable as "belonged to a deleted project".
+        static::deleting(fn (self $project) => $project->retireCurrentToken());
+    }
 
     protected function casts(): array
     {
@@ -59,14 +69,13 @@ class Project extends Model
      */
     public static function createWithToken(User $user, string $name): array
     {
-        $token = 'hk_live_'.Str::random(40);
+        [$token, $tokenColumns] = self::issueToken();
 
         $project = new self;
         $project->forceFill([
             'user_id' => $user->id,
             'name' => $name,
-            'api_token_hash' => hash('sha256', $token),
-            'api_token_prefix' => substr($token, 0, 16),
+            ...$tokenColumns,
         ])->save();
 
         $project->rules()->createMany(
@@ -78,11 +87,6 @@ class Project extends Model
         return [$project, $token];
     }
 
-    public static function findByPlaintextToken(string $token): ?self
-    {
-        return static::where('api_token_hash', hash('sha256', $token))->first();
-    }
-
     /**
      * Replaces the project's token. The old one stops working immediately,
      * because requests are matched by hash. Returns the new plaintext token,
@@ -92,9 +96,52 @@ class Project extends Model
     {
         [$token, $tokenColumns] = self::issueToken();
 
-        $this->forceFill($tokenColumns)->save();
+        DB::transaction(function () use ($tokenColumns): void {
+            $this->retireCurrentToken();
+            $this->forceFill($tokenColumns)->save();
+        });
 
         return $token;
+    }
+
+    /**
+     * Remembers the hash of the current token, so that after the token is
+     * replaced or the project is deleted it can still be told apart from one
+     * that was never issued. Only a hash is kept, and the row has no foreign
+     * key on purpose: it must outlive the project.
+     */
+    public function retireCurrentToken(): void
+    {
+        DB::table('retired_tokens')->insertOrIgnore([
+            'token_hash' => $this->api_token_hash,
+            'project_id' => $this->getKey(),
+            'retired_at' => now(),
+        ]);
+    }
+
+    /**
+     * Why a token that matches no project is rejected: replaced by a newer
+     * one, belonging to a deleted project, or unknown altogether. Meant for
+     * the failure path only.
+     */
+    public static function rejectionReason(string $token): TokenRejection
+    {
+        $projectId = DB::table('retired_tokens')
+            ->where('token_hash', hash('sha256', $token))
+            ->value('project_id');
+
+        if ($projectId === null) {
+            return TokenRejection::InvalidToken;
+        }
+
+        return static::whereKey($projectId)->exists()
+            ? TokenRejection::TokenRevoked
+            : TokenRejection::ProjectDeleted;
+    }
+
+    public static function findByPlaintextToken(string $token): ?self
+    {
+        return static::where('api_token_hash', hash('sha256', $token))->first();
     }
 
     /**
