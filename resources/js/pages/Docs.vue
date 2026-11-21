@@ -30,28 +30,29 @@ const article = ref<HTMLElement | null>(null);
 const { items, activeId, goTo } = useTableOfContents(article);
 
 // Keep the output examples in sync with what hookify-cli really prints.
-// !!! Wrapped in ref(): without it vue-tsc reports a bogus "Property 'value' does not exist" in the template.
-const snippets = ref({
-  syncOutput: `Hookify · my-project
+// Separate constants rather than one object: vue-tsc reports a bogus
+// "Property 'value' does not exist" for an object used in this template.
+const syncOutput = `Hookify · my-project
 ✔ Config fetched from hookify.to
 ✔ pre-commit hook installed (3 checks)
   • pint
   • phpstan
   • oxfmt
 
-1 hook active.`,
-  hookFailure: `✔ pint
+1 hook active.`;
+
+const hookFailure = `✔ pint
 ✖ phpstan
    ------ ------------------------------
     Line   app/Foo.php
    ------ ------------------------------
     12     Undefined variable: $user
 
-phpstan failed. Commit aborted.`,
-  missingTool: `✖ oxlint is not installed
+phpstan failed. Commit aborted.`;
+
+const missingTool = `✖ oxlint is not installed
   Fix: npm install -D oxlint
-  Or disable this check in the Hookify dashboard and run: npx hookify-cli sync`,
-});
+  Or disable this check in the Hookify dashboard and run: npx hookify-cli sync`;
 </script>
 
 <template>
@@ -115,7 +116,7 @@ phpstan failed. Commit aborted.`,
           Fetches the project's current configuration and writes the matching hooks into
           <code>.git/hooks</code>.
         </p>
-        <CodeBlock :code="snippets.syncOutput" />
+        <CodeBlock :code="syncOutput" />
         <ul>
           <li>
             Writes only the hook types that have checks enabled, and removes a hook again when you
@@ -130,8 +131,8 @@ phpstan failed. Commit aborted.`,
             says so.
           </li>
           <li>
-            Notices a dead token. On a 401 it removes the hooks it installed, clears its cache and
-            exits with an error. See
+            Tells apart why a token is rejected. It removes the hooks it installed only when the
+            project was deleted; a replaced or unrecognized token leaves them alone. See
             <a href="#token-no-longer-valid" @click.prevent="goTo('token-no-longer-valid')"
               >troubleshooting</a
             >.
@@ -152,7 +153,7 @@ phpstan failed. Commit aborted.`,
             more. A failing check shows its own output.
           </li>
         </ol>
-        <CodeBlock :code="snippets.hookFailure" />
+        <CodeBlock :code="hookFailure" />
         <p>To skip the hooks for a single commit, use <code>git commit --no-verify</code>.</p>
 
         <h3 id="configuration">Configuration</h3>
@@ -234,13 +235,14 @@ phpstan failed. Commit aborted.`,
           <strong>Regenerate token</strong>. A new token is shown once, and the old one stops
           working immediately. Update it wherever it was used: in your teammates' environments and
           in CI secrets. Anyone who runs <code>sync</code> with the old token gets an error. Their
-          installed hooks keep working, but won’t update until they use the new token.
+          installed hooks keep working, but won't update until they use the new token.
         </p>
 
         <h3 id="deleting-a-project">Deleting a project</h3>
         <p>
           Deleting a project revokes its token. Hooks already installed keep running locally, since
-          they don't contact Hookify, and the next <code>sync</code> removes them.
+          they don't contact Hookify. The next <code>sync</code> reports that the project no longer
+          exists and removes them.
         </p>
 
         <h2 id="github-access">GitHub access</h2>
@@ -289,6 +291,11 @@ phpstan failed. Commit aborted.`,
           code="HOOKIFY_TOKEN=hk_live_... HOOKIFY_API=https://your-hookify-instance/api/v1 npx hookify-cli sync"
         />
         <p>
+          The server reports why it rejects a token. An instance that doesn't (older versions) is
+          treated as “token not recognized”: hooks are kept, and a deleted project's hooks are not
+          removed automatically.
+        </p>
+        <p>
           Only point <code>HOOKIFY_API</code> at a server you trust: the server decides which
           commands the generated hooks run on your machine. See the
           <a href="https://github.com/BarneyMayerson/hookify" target="_blank" rel="noopener"
@@ -316,13 +323,27 @@ phpstan failed. Commit aborted.`,
 
         <h2 id="troubleshooting">Troubleshooting</h2>
 
-        <h3 id="token-no-longer-valid">“This project token is no longer valid”</h3>
+        <h3 id="token-no-longer-valid">sync reports a token problem</h3>
         <p>
-          The token was regenerated, the project was deleted, or the token belongs to another server
-          (a development token used against hookify.to, for example). <code>sync</code> removes the
-          hooks it installed. Copy the current token from the project's page, or regenerate it in
-          the project's Settings, and run <code>sync</code> again.
+          The server rejected the token. <code>sync</code> says why, and what happens to your hooks
+          depends on the reason:
         </p>
+        <ul>
+          <li>
+            <strong>“This project token was replaced.”</strong> The token was regenerated. Your
+            installed hooks keep working, but they won't update. Copy the new token from the
+            project's page, or regenerate it again, and run <code>sync</code>.
+          </li>
+          <li>
+            <strong>“This project no longer exists.”</strong> The project was deleted.
+            <code>sync</code> removes the hooks it installed and its cache.
+          </li>
+          <li>
+            <strong>“This token is not recognized.”</strong> A typo, or a token from another server
+            (a development token used against hookify.to, for example). Your hooks are left alone.
+            Check <code>HOOKIFY_TOKEN</code> and <code>HOOKIFY_API</code>.
+          </li>
+        </ul>
 
         <h3 id="tool-not-installed">“… is not installed”</h3>
         <p>
@@ -330,7 +351,7 @@ phpstan failed. Commit aborted.`,
           Install it as the message says, or disable the check in the dashboard and run
           <code>sync</code> again.
         </p>
-        <CodeBlock :code="snippets.missingTool" />
+        <CodeBlock :code="missingTool" />
 
         <h3 id="hooks-do-not-run">The hooks don't run</h3>
         <p>

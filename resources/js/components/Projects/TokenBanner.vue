@@ -48,7 +48,7 @@ const texts = computed(() =>
           "Copy the command now. The token won't be shown again, and the previous token no longer works.",
         steps: [
           'Update HOOKIFY_TOKEN wherever the old token was used: CI secrets and your teammates.',
-          'Anyone who runs sync with the old token gets an error. Their installed hooks keep working, but won’t update until they use the new token.',
+          "Anyone who runs sync with the old token gets an error. Their installed hooks keep working, but won't update until they use the new token.",
           'Run the command in a repository to check that the new token works.',
         ],
       }

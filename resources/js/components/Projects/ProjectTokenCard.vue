@@ -76,7 +76,7 @@ function regenerateToken() {
             <li>Everyone who uses the old token needs the new one: teammates and CI secrets.</li>
             <li>
               Anyone who runs sync with the old token gets an error. Their installed hooks keep
-              working until they use the new token.
+              working, but won't update until they use the new token.
             </li>
           </ul>
 
